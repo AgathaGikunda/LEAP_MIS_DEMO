@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LEAP PNG — Data Collection Pipeline Demo</title>
+<style>
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;min-height:100vh}
+.wrap{max-width:1200px;margin:0 auto;padding:14px}
+.hdr{background:#1F3864;border-radius:10px 10px 0 0;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr h1{color:#fff;font-size:14px;font-weight:700}
+.hdr p{color:#90afd4;font-size:10px;margin-top:2px}
+.hdr-r{display:flex;gap:6px}
+.bdg{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.bb{background:#1e40af;color:#bfdbfe}.bg{background:#166534;color:#bbf7d0}.ba{background:#854d0e;color:#fef3c7}.br{background:#991b1b;color:#fee2e2}
+.nav{background:#142a4f;display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.08)}
+.ntab{padding:9px 15px;color:#90afd4;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;user-select:none;transition:all 0.15s}
+.ntab:hover{color:#fff}.ntab.on{color:#fff;border-bottom-color:#4da6ff}
+.body{background:#fff;border-radius:0 0 10px 10px;padding:16px}
+.pg{display:none}.pg.on{display:block}
+
+/* KPI */
+.kg{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.kc{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:9px 12px;position:relative;overflow:hidden}
+.kc::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.cb::before{background:#2E75B6}.cg::before{background:#16a34a}.ca::before{background:#d97706}.cr::before{background:#dc2626}.cp::before{background:#7c3aed}.cgy::before{background:#64748b}
+.kl{font-size:9px;color:#64748b;line-height:1.3;margin-bottom:3px}
+.kv{font-size:20px;font-weight:700;color:#1F3864;line-height:1}
+.ks{font-size:9px;color:#94a3b8;margin-top:2px}
+
+/* FILTER BAR */
+.fbar{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px 12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.fbar label{font-size:10px;color:#64748b;font-weight:600}
+.fbar select{font-size:11px;padding:4px 8px;border:1px solid #cbd5e1;border-radius:6px;color:#1e293b;background:#fff}
+.fbar input{font-size:11px;padding:4px 10px;border:1px solid #cbd5e1;border-radius:6px;color:#1e293b;background:#fff;min-width:180px}
+.fbar-btn{padding:4px 12px;border-radius:6px;border:1px solid #1F3864;background:#1F3864;color:#fff;font-size:10px;cursor:pointer;font-weight:600}
+
+/* SCHOOL TABLE */
+.stbl{width:100%;border-collapse:collapse;font-size:11px}
+.stbl th{background:#1F3864;color:#fff;padding:7px 10px;text-align:left;font-size:10px;font-weight:600;position:sticky;top:0}
+.stbl td{padding:6px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle;color:#1e293b}
+.stbl tr:hover td{background:#f8fafc;cursor:pointer}
+.stbl tr.selected td{background:#eff6ff}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
+.p-conf{background:#dcfce7;color:#166534}
+.p-exc{background:#fef9c3;color:#854d0e}
+.p-part{background:#fee2e2;color:#991b1b}
+.p-trans{background:#dbeafe;color:#1e40af}
+.p-pend{background:#f1f5f9;color:#64748b}
+.act-btn{padding:3px 9px;border-radius:6px;border:1px solid #2E75B6;background:#fff;color:#2E75B6;font-size:9px;cursor:pointer;font-weight:600}
+.act-btn:hover{background:#2E75B6;color:#fff}
+
+/* SHIPMENT DETAIL PANEL */
+.detail-panel{background:#f8fafc;border:2px solid #2E75B6;border-radius:10px;padding:14px;margin-top:12px;display:none}
+.detail-panel.on{display:block}
+.dp-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.dp-title{font-size:13px;font-weight:700;color:#1F3864}
+.dp-close{cursor:pointer;color:#64748b;font-size:18px;line-height:1}
+.dp-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.dm{background:#fff;border:1px solid #e2e8f0;border-radius:6px;padding:7px 10px}
+.dm label{font-size:9px;color:#94a3b8;display:block;margin-bottom:2px}
+.dm value{font-size:12px;font-weight:600;color:#1e293b;display:block}
+.alert-box{border-radius:6px;padding:7px 12px;margin-bottom:9px;font-size:10px;display:flex;align-items:flex-start;gap:7px}
+.ab-warn{background:#fffbeb;border:1px solid #fde68a;color:#854d0e}
+.ab-err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.ab-ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+
+/* CARTON TABLE */
+.ctbl{width:100%;border-collapse:collapse;font-size:10px}
+.ctbl th{background:#334155;color:#fff;padding:5px 8px;text-align:left;font-size:9px;font-weight:600}
+.ctbl td{padding:5px 8px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+.ctbl tr:hover td{background:#f0f9ff;cursor:pointer}
+.c-delivered{color:#166534;font-weight:600}
+.c-transit{color:#1e40af}
+.c-missing{color:#991b1b;font-weight:600}
+.c-damaged{color:#854d0e;font-weight:600}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:12px;padding:20px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.modal-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.modal-title{font-size:13px;font-weight:700;color:#1F3864}
+.modal-close{cursor:pointer;color:#94a3b8;font-size:20px;line-height:1;flex-shrink:0}
+.scan-tbl{width:100%;border-collapse:collapse;font-size:10px;margin-top:10px}
+.scan-tbl th{background:#f1f5f9;color:#475569;padding:5px 8px;text-align:left;font-size:9px;font-weight:600}
+.scan-tbl td{padding:5px 8px;border-bottom:1px solid #f8fafc;vertical-align:middle}
+.scan-event{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:20px;font-size:9px;font-weight:600}
+.ev-packed{background:#e0e7ff;color:#3730a3}
+.ev-dispatched{background:#dbeafe;color:#1e40af}
+.ev-received{background:#fef9c3;color:#854d0e}
+.ev-delivered{background:#dcfce7;color:#166534}
+.ev-missing{background:#fee2e2;color:#991b1b}
+.ev-damaged{background:#ffedd5;color:#9a3412}
+.carton-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.ci-box{background:#f8fafc;border-radius:6px;padding:7px 10px}
+.ci-box label{font-size:9px;color:#94a3b8;display:block;margin-bottom:2px}
+.ci-box value{font-size:11px;font-weight:600;color:#1e293b;display:block}
+.flag-box{background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:7px 11px;margin-top:8px;font-size:10px;color:#991b1b}
+.flag-box strong{display:block;margin-bottom:2px}
+.chain-vis{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin:10px 0;font-size:10px}
+.cv-step{display:flex;align-items:center;gap:3px}
+.cv-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:2px solid #fff;box-shadow:0 0 0 1px #ccc}
+.cv-done{background:#16a34a}.cv-curr{background:#d97706}.cv-pend{background:#e2e8f0}
+.cv-arr{color:#94a3b8;font-size:10px}
+.cv-label{white-space:nowrap}
+
+/* LOOKUP TAB */
+.lookup-box{max-width:600px;margin:0 auto}
+.lookup-input{display:flex;gap:8px;margin-bottom:12px}
+.lookup-input input{flex:1;padding:9px 14px;border:2px solid #cbd5e1;border-radius:8px;font-size:12px}
+.lookup-input input:focus{outline:none;border-color:#2E75B6}
+.lookup-btn{padding:9px 18px;background:#1F3864;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer}
+.sample-btns{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.sample-btn{padding:4px 10px;border-radius:6px;border:1px solid #2E75B6;background:#fff;color:#2E75B6;font-size:10px;cursor:pointer;font-family:monospace}
+.sample-btn:hover{background:#2E75B6;color:#fff}
+.lookup-result{display:none;border:2px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.lookup-result.on{display:block}
+.lr-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.lr-id{font-size:13px;font-weight:700;color:#1F3864;font-family:monospace}
+
+/* SCHOOL RECEIVING TAB */
+.recv-wrap{max-width:700px;margin:0 auto}
+.recv-select{display:flex;gap:10px;align-items:center;margin-bottom:16px}
+.recv-select select{flex:1;padding:9px 12px;border:2px solid #cbd5e1;border-radius:8px;font-size:12px}
+.recv-card{border:2px solid #e2e8f0;border-radius:10px;overflow:hidden}
+.recv-hdr{background:#1F3864;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.recv-hdr h3{color:#fff;font-size:13px;font-weight:700}
+.recv-hdr small{color:#90afd4;font-size:10px}
+.recv-body{padding:14px}
+.etbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:14px}
+.etbl th{background:#f1f5f9;color:#475569;padding:6px 10px;text-align:left;font-size:10px;font-weight:600}
+.etbl td{padding:6px 10px;border-bottom:1px solid #f8fafc}
+.etbl tr.total td{background:#1F3864;color:#fff;font-weight:700}
+.recv-actions{display:flex;gap:10px;margin-top:12px}
+.btn-confirm{flex:1;padding:12px;background:#16a34a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.btn-exception{flex:1;padding:12px;background:#fff;color:#dc2626;border:2px solid #dc2626;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+.exception-form{display:none;margin-top:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:14px}
+.exception-form.on{display:block}
+.exc-checks{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.exc-check{display:flex;align-items:center;gap:7px;font-size:12px;cursor:pointer}
+.exc-check input{width:15px;height:15px}
+.exc-textarea{width:100%;padding:8px;border:1px solid #fca5a5;border-radius:6px;font-size:11px;height:70px;resize:vertical}
+.submit-exc{padding:9px 20px;background:#dc2626;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.confirmed-screen{display:none;text-align:center;padding:30px}
+.confirmed-screen.on{display:block}
+.big-check{font-size:60px}
+.conf-title{font-size:18px;font-weight:700;color:#166534;margin:10px 0 5px}
+
+/* MAP VIEW */
+.map-card{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:14px;margin-bottom:14px}
+.map-title{font-size:12px;font-weight:700;color:#1F3864;margin-bottom:10px}
+.map-svg{width:100%;border-radius:8px;border:1px solid #e2e8f0}
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:#475569}
+.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+
+/* OUTER NAV */
+.outer-nav{background:#0f1f3d;display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.12)}
+.otab{padding:10px 18px;color:#90afd4;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;user-select:none;transition:all 0.15s}
+.otab:hover{color:#fff;background:rgba(255,255,255,0.05)}
+.otab.on{color:#fff;border-bottom-color:#fbbf24}
+.inner-nav{background:#142a4f;display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.08)}
+.itab{padding:8px 14px;color:#90afd4;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;user-select:none;transition:all 0.15s}
+.itab:hover{color:#fff}.itab.on{color:#fff;border-bottom-color:#4da6ff}
+.opg{display:none}.opg.on{display:block}
+.ipg{display:none}.ipg.on{display:block}
+.flow-note{background:#fffbeb;border:1.5px solid #fbbf24;border-radius:8px;padding:11px 14px;margin-bottom:14px;font-size:11px;color:#78350f}
+.flow-note strong{display:block;font-size:12px;font-weight:700;margin-bottom:3px}
+/* KOBO FORM VIEWER */
+.src-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.kb{background:#dcfce7;color:#166534}.bt{background:#dbeafe;color:#1e40af}
+.kframe{border:2px solid #e2e8f0;border-radius:10px;overflow:hidden;max-width:780px;margin:0 auto}
+.ktopbar{padding:8px 14px;display:flex;align-items:center;justify-content:space-between}
+.ktopbar span{color:#fff;font-size:12px;font-weight:700}
+.ktopbar small{color:rgba(255,255,255,0.7);font-size:10px}
+.kmeta{padding:9px 14px;border-bottom:1px solid;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mc{font-size:10px}
+.mc span{display:block;font-size:9px;color:#64748b}
+.mc strong{font-size:11px}
+.ksec{padding:11px 14px;border-bottom:1px solid #f1f5f9}
+.ksec h4{font-size:11px;font-weight:700;color:#1F3864;margin-bottom:8px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:6px}
+.f{background:#f8fafc;border-radius:6px;padding:6px 10px}
+.f label{font-size:9px;color:#94a3b8;display:block;margin-bottom:2px}
+.f value{font-size:11px;font-weight:600;color:#1e293b;display:block}
+.gps-row{background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;padding:7px 11px;font-size:10px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.gps-note{font-size:9px;color:#0369a1;margin-top:2px}
+.cklist{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ci{display:flex;align-items:center;gap:6px;font-size:10px;padding:4px 8px;border-radius:6px}
+.cy{background:#f0fdf4;color:#166534}.cn{background:#fef2f2;color:#991b1b}
+.cico{width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;flex-shrink:0}
+.pstrip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:6px}
+.pbox{border-radius:7px;overflow:hidden;border:1px solid #e2e8f0;aspect-ratio:4/3;background:#f1f5f9;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;color:#94a3b8;font-size:9px;cursor:pointer}
+.pbox:hover{background:#e2e8f0}
+.pico{font-size:22px}
+.warn-box{background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:7px 10px;margin-top:7px;font-size:10px;color:#92400e}
+.warn-box strong{display:block;margin-bottom:2px}
+.kfooter{background:#f8fafc;padding:7px 14px;display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#94a3b8}
+.sbadge{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.contractor-sec{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;margin-bottom:8px}
+.contractor-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px}
+.contractor-title{font-size:11px;font-weight:700;color:#1F3864}
+.c-status{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
+.cs-complete{background:#dcfce7;color:#166534}
+.cs-progress{background:#fef9c3;color:#854d0e}
+.cs-notstarted{background:#fee2e2;color:#991b1b}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hdr">
+  <div>
+    <h1>LEAP PNG — Data Collection Pipeline Demo</h1>
+    <p>How field data is collected and feeds the MIS Dashboard · Three tools demonstrated</p>
+  </div>
+  <div class="hdr-r">
+    <span class="bdg bb">Admin demo</span>
+    <span class="bdg bg">LEAP PNG</span>
+    <span class="bdg ba">Q1 2026</span>
+  </div>
+</div>
+<div class="outer-nav" id="outer-nav">
+  <div class="otab on" data-otab="bluetree">&#128230; Bluetree Track &amp; Trace — TLM Distribution</div>
+  <div class="otab" data-otab="classroom">&#127959; GEMS — Classroom Construction</div>
+  <div class="otab" data-otab="ict">&#128187; GEMS — ICT Hub Refurbishment</div>
+</div>
+<div class="body">
+
+<div class="opg on" id="opg-bluetree">
+  <div class="flow-note" style="margin-top:4px">
+    <strong>&#128230; How Bluetree T&amp;T feeds the MIS dashboard</strong>
+    Every carton scan — from the printing facility through the distribution chain to school receipt confirmation — is recorded in real time. The MIS dashboard pulls the school-level confirmation count per province to show Complete / In Progress / Not Started on the PNG map. The two questions this system answers at any time: <em>Where is this carton?</em> and <em>Did the intended school receive what it was supposed to receive?</em>
+  </div>
+  <div class="inner-nav">
+    <div class="itab on" data-itab="dashboard">Admin dashboard</div>
+    <div class="itab" data-itab="shipments">Shipments &amp; cartons</div>
+    <div class="itab" data-itab="lookup">Carton lookup</div>
+    <div class="itab" data-itab="receiving">School receiving</div>
+    <div class="itab" data-itab="scan">&#128247; Scan interface</div>
+  </div>
+  <div class="ipg on" id="ipg-dashboard">
+    <div class="kg">
+      <div class="kc cb"><div class="kl">Schools expected</div><div class="kv">10</div><div class="ks">3 provinces</div></div>
+      <div class="kc cg"><div class="kl">Deliveries confirmed</div><div class="kv">5</div><div class="ks">fully confirmed</div></div>
+      <div class="kc ca"><div class="kl">Exceptions</div><div class="kv">3</div><div class="ks">partial / damaged / wrong</div></div>
+      <div class="kc cr"><div class="kl">In transit / pending</div><div class="kv">2</div><div class="ks">not yet delivered</div></div>
+      <div class="kc cp"><div class="kl">Total cartons dispatched</div><div class="kv">162</div><div class="ks">of 182 planned</div></div>
+      <div class="kc cgy"><div class="kl">Cartons outstanding</div><div class="kv">20</div><div class="ks">not yet dispatched</div></div>
+    </div>
+    <div class="map-card">
+      <div class="map-title">Distribution overview — target provinces</div>
+      <svg class="map-svg" viewBox="0 0 800 220" style="height:180px;background:#c8e6f5;border-radius:8px">
+        <rect width="800" height="220" fill="#c8e6f5" rx="8"/>
+        <path d="M60,80 Q120,40 200,50 Q280,35 360,55 Q440,45 500,65 Q560,50 600,75 Q640,60 700,80 Q740,100 720,130 Q700,160 650,170 Q580,180 520,160 Q460,180 400,165 Q340,180 280,165 Q220,175 160,155 Q100,145 70,120 Z" fill="#dbeafe" stroke="#7ba7bc" stroke-width="1.5" opacity="0.8"/>
+        <ellipse cx="750" cy="120" rx="30" ry="18" fill="#dbeafe" stroke="#7ba7bc" stroke-width="1"/>
+        <g><circle cx="260" cy="100" r="30" fill="#16a34a" opacity="0.15"/><circle cx="260" cy="100" r="20" fill="#16a34a" stroke="#fff" stroke-width="2"/><text x="260" y="104" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">3</text><text x="260" y="138" text-anchor="middle" fill="#1F3864" font-size="9" font-weight="600">W.Highlands</text><text x="260" y="149" text-anchor="middle" fill="#64748b" font-size="8">4 schools · 3 confirmed</text></g>
+        <g><circle cx="180" cy="90" r="25" fill="#d97706" opacity="0.15"/><circle cx="180" cy="90" r="18" fill="#d97706" stroke="#fff" stroke-width="2"/><text x="180" y="94" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">1</text><text x="180" y="126" text-anchor="middle" fill="#1F3864" font-size="9" font-weight="600">Enga</text><text x="180" y="137" text-anchor="middle" fill="#64748b" font-size="8">3 schools · 1 confirmed</text></g>
+        <g><circle cx="420" cy="120" r="28" fill="#7c3aed" opacity="0.15"/><circle cx="420" cy="120" r="20" fill="#7c3aed" stroke="#fff" stroke-width="2"/><text x="420" y="124" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">2</text><text x="420" y="158" text-anchor="middle" fill="#1F3864" font-size="9" font-weight="600">Morobe</text><text x="420" y="169" text-anchor="middle" fill="#64748b" font-size="8">3 schools · 2 confirmed</text></g>
+        <text x="340" y="50" text-anchor="middle" fill="#1F3864" font-size="8" font-weight="600">Central Warehouse · Port Moresby</text>
+        <line x1="340" y1="55" x2="260" y2="80" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="340" y1="55" x2="180" y2="72" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="340" y1="55" x2="420" y2="100" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4,3"/>
+        <circle cx="340" cy="50" r="5" fill="#1F3864"/>
+      </svg>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:#16a34a"></div>All schools confirmed</div>
+        <div class="li"><div class="ld" style="background:#d97706"></div>Partial / in transit</div>
+        <div class="li"><div class="ld" style="background:#7c3aed"></div>Mixed status</div>
+      </div>
+    </div>
+    <div class="fbar">
+      <label>Province:</label>
+      <select id="f-province" onchange="filterSchools()"><option value="">All provinces</option><option>Western Highlands</option><option>Enga</option><option>Morobe</option></select>
+      <label>Status:</label>
+      <select id="f-status" onchange="filterSchools()"><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="exception">Exception</option><option value="partial">Partial delivery</option><option value="transit">In transit</option><option value="pending">Not dispatched</option></select>
+      <label>Search:</label>
+      <input id="f-search" type="text" placeholder="School name or ID..." oninput="filterSchools()">
+      <button class="fbar-btn" onclick="clearFilters()">Clear</button>
+    </div>
+    <div style="overflow-x:auto;border:1.5px solid #e2e8f0;border-radius:10px">
+      <table class="stbl" id="school-table">
+        <thead><tr><th>School ID</th><th>School name</th><th>Province</th><th>District</th><th>Shipment ID</th><th>Exp. delivery date</th><th style="text-align:center">Cartons exp.</th><th style="text-align:center">Delivered</th><th style="text-align:center">Missing</th><th style="text-align:center">Damaged</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="school-tbody"></tbody>
+      </table>
+    </div>
+    <div class="detail-panel" id="detail-panel">
+      <div class="dp-hdr"><div><div class="dp-title" id="dp-title">Shipment detail</div><div style="font-size:10px;color:#64748b;margin-top:2px" id="dp-subtitle"></div></div><span class="dp-close" onclick="closeDetail()">&#10005;</span></div>
+      <div class="dp-meta" id="dp-meta"></div>
+      <div id="dp-alerts"></div>
+      <div id="dp-chain"></div>
+      <div style="font-size:11px;font-weight:700;color:#1F3864;margin-bottom:7px">Carton manifest — click any row for full scan history</div>
+      <div style="overflow-x:auto"><table class="ctbl"><thead><tr><th>Carton ID</th><th>Material</th><th>Grade</th><th>Qty</th><th>Status</th><th>Last location</th><th>Last scan</th><th>Flag</th></tr></thead><tbody id="dp-cartons"></tbody></table></div>
+    </div>
+  </div>
+  <div class="ipg" id="ipg-shipments">
+    <div class="fbar">
+      <label>Province:</label>
+      <select id="sf-province" onchange="filterSchools2()"><option value="">All provinces</option><option>Western Highlands</option><option>Enga</option><option>Morobe</option></select>
+      <label>Status:</label>
+      <select id="sf-status" onchange="filterSchools2()"><option value="">All statuses</option><option value="confirmed">Confirmed</option><option value="exception">Exception</option><option value="partial">Partial</option><option value="transit">In transit</option><option value="pending">Pending</option></select>
+    </div>
+    <div style="overflow-x:auto;border:1.5px solid #e2e8f0;border-radius:10px;margin-bottom:12px">
+      <table class="stbl" id="school-table2">
+        <thead><tr><th>School ID</th><th>School name</th><th>Province</th><th>District</th><th>Shipment ID</th><th>Exp. delivery date</th><th style="text-align:center">Cartons exp.</th><th style="text-align:center">Delivered</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="school-tbody2"></tbody>
+      </table>
+    </div>
+    <div class="detail-panel" id="detail-panel2">
+      <div class="dp-hdr"><div class="dp-title" id="dp2-title">Shipment detail</div><span class="dp-close" onclick="document.getElementById('detail-panel2').classList.remove('on')">&#10005;</span></div>
+      <div class="dp-meta" id="dp2-meta"></div>
+      <div id="dp2-alerts"></div>
+      <div id="dp2-chain"></div>
+      <div style="font-size:11px;font-weight:700;color:#1F3864;margin-bottom:7px">Carton manifest</div>
+      <div style="overflow-x:auto"><table class="ctbl"><thead><tr><th>Carton ID</th><th>Material</th><th>Grade</th><th>Qty</th><th>Status</th><th>Last location</th><th>Last scan</th><th>Flag</th></tr></thead><tbody id="dp2-cartons"></tbody></table></div>
+    </div>
+  </div>
+  <div class="ipg" id="ipg-lookup">
+    <div class="lookup-box">
+      <div style="font-size:13px;font-weight:700;color:#1F3864;margin-bottom:4px">Carton lookup — Where is this carton?</div>
+      <div style="font-size:11px;color:#64748b;margin-bottom:12px">Enter a carton ID to see its full chain of custody — every scan point from warehouse to school</div>
+      <div class="lookup-input"><input type="text" id="carton-search" placeholder="e.g. PNG-LEAP-2026-00001"/><button class="lookup-btn" onclick="lookupCarton()">Search</button></div>
+      <div style="font-size:10px;color:#64748b;margin-bottom:6px;font-weight:600">Try a sample carton:</div>
+      <div class="sample-btns" id="sample-btns"></div>
+      <div class="lookup-result" id="lookup-result"></div>
+    </div>
+  </div>
+  <div class="ipg" id="ipg-receiving">
+    <div class="recv-wrap">
+      <div style="font-size:13px;font-weight:700;color:#1F3864;margin-bottom:4px">School receiving interface</div>
+      <div style="font-size:11px;color:#64748b;margin-bottom:12px">Used by the school head teacher or authorised representative to confirm receipt of TLM delivery</div>
+      <div class="recv-select"><label style="font-size:11px;font-weight:600;color:#475569;white-space:nowrap">Select school:</label><select id="recv-school-sel" onchange="loadSchoolRecv()"><option value="">-- Select school --</option></select></div>
+      <div id="recv-card-wrap" style="display:none">
+        <div class="recv-card">
+          <div class="recv-hdr"><div><h3 id="rv-school-name">School name</h3><small id="rv-delivery-id">Delivery ID: —</small></div><div style="text-align:right"><div style="color:#fff;font-size:20px;font-weight:700" id="rv-expected-count">—</div><div style="color:#90afd4;font-size:10px">expected cartons</div></div></div>
+          <div class="recv-body">
+            <div style="font-size:11px;font-weight:700;color:#1F3864;margin-bottom:8px">Expected delivery manifest — check cartons match</div>
+            <table class="etbl" id="rv-etbl"><thead><tr><th>Material</th><th>Grade / Level</th><th>Category</th><th style="text-align:center">Cartons expected</th><th style="text-align:center">Books per carton</th></tr></thead><tbody id="rv-tbody"></tbody></table>
+            <div id="rv-status-section">
+              <div class="recv-actions">
+                <button class="btn-confirm" onclick="confirmDelivery()">&#10003; Confirm full delivery</button>
+                <button class="btn-exception" onclick="toggleException()">&#9888; Report an exception</button>
+              </div>
+              <div class="exception-form" id="exc-form">
+                <div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:10px">Report delivery exception</div>
+                <div class="exc-checks">
+                  <label class="exc-check"><input type="checkbox" id="exc-missing"> Missing cartons</label>
+                  <label class="exc-check"><input type="checkbox" id="exc-damaged"> Damaged cartons</label>
+                  <label class="exc-check"><input type="checkbox" id="exc-wrong"> Wrong materials delivered</label>
+                  <label class="exc-check"><input type="checkbox" id="exc-other"> Other issue</label>
+                </div>
+                <div style="font-size:10px;color:#64748b;margin-bottom:5px;font-weight:600">Describe the exception:</div>
+                <textarea class="exc-textarea" id="exc-detail" placeholder="e.g. 3 cartons of Grade 2 Literacy reader not in delivery."></textarea>
+                <div style="margin-top:8px;display:flex;gap:8px">
+                  <button class="submit-exc" onclick="submitException()">Submit exception report</button>
+                  <button style="padding:9px 16px;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#64748b;cursor:pointer;font-size:12px" onclick="toggleException()">Cancel</button>
+                </div>
+              </div>
+            </div>
+            <div class="confirmed-screen" id="conf-screen">
+              <div class="big-check" id="conf-icon">&#9989;</div>
+              <div class="conf-title" id="conf-title">Delivery confirmed</div>
+              <div style="font-size:12px;color:#64748b;margin-top:5px" id="conf-sub"></div>
+              <div style="margin-top:14px;font-size:11px;background:#f0fdf4;border-radius:8px;padding:10px 14px;color:#166534;text-align:left" id="conf-detail"></div>
+              <button style="margin-top:14px;padding:9px 20px;background:#1F3864;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600" onclick="resetRecv()">New confirmation</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="ipg" id="ipg-scan">
+  <div style="font-size:11px;color:#64748b;margin-bottom:14px">This is the interface used by distribution officers to scan cartons in and out at each point in the chain. Every scan builds the chain of custody visible in the Admin Dashboard and Carton Lookup tabs.</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div style="border:2px solid #1e40af;border-radius:10px;overflow:hidden">
+      <div style="background:#1e40af;padding:10px 14px">
+        <div style="color:#fff;font-size:12px;font-weight:700">&#128228; Dispatch officer — scan cartons OUT</div>
+        <div style="color:#bfdbfe;font-size:10px;margin-top:2px">Used at: Central Warehouse · Province Hub · District Office</div>
+      </div>
+      <div style="padding:13px">
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;font-weight:700;color:#475569;display:block;margin-bottom:4px">Select shipment to dispatch:</label>
+          <select id="disp-shipment" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px" onchange="loadDispatch()">
+            <option value="">-- Select shipment --</option>
+            <option value="SH-PNG-2026-0041">SH-PNG-2026-0041 — Banz Primary School (18 cartons)</option>
+            <option value="SH-PNG-2026-0052">SH-PNG-2026-0052 — Laiagam Community School (12 cartons)</option>
+            <option value="SH-PNG-2026-0061">SH-PNG-2026-0061 — Lae Secondary School (28 cartons)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;font-weight:700;color:#475569;display:block;margin-bottom:4px">Dispatching from:</label>
+          <select id="disp-location" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px">
+            <option>Central Warehouse — Port Moresby</option>
+            <option>Mt Hagen Province Hub</option>
+            <option>Enga Province Hub — Wabag</option>
+            <option>Lae Province Hub</option>
+            <option>North Waghi District Education Office</option>
+            <option>Laiagam District Education Office</option>
+            <option>Lae Urban District Education Office</option>
+          </select>
+        </div>
+        <div id="disp-carton-list" style="display:none;margin-bottom:10px">
+          <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:6px">Cartons in this shipment — scan or enter each ID:</div>
+          <div style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;max-height:160px;overflow-y:auto" id="disp-list"></div>
+          <div style="display:flex;gap:7px;margin-top:8px">
+            <input id="disp-scan-input" type="text" placeholder="Enter carton ID..." style="flex:1;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-family:monospace">
+            <button onclick="scanDispatch()" style="padding:7px 14px;background:#1e40af;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Scan</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px">
+            <span id="disp-counter" style="color:#64748b">0 of 0 cartons scanned</span>
+            <button onclick="confirmDispatch()" id="disp-confirm-btn" style="padding:7px 16px;background:#16a34a;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;display:none">Confirm dispatch</button>
+          </div>
+        </div>
+        <div id="disp-done" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:10px 12px;font-size:11px;color:#166534">
+          <div style="font-weight:700;margin-bottom:3px">&#10003; Dispatch recorded</div>
+          <div id="disp-done-detail"></div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:4px">Scan event logged · chain of custody updated · visible in Admin Dashboard</div>
+        </div>
+      </div>
+    </div>
+    <div style="border:2px solid #166534;border-radius:10px;overflow:hidden">
+      <div style="background:#166534;padding:10px 14px">
+        <div style="color:#fff;font-size:12px;font-weight:700">&#128229; Receiving officer — scan cartons IN</div>
+        <div style="color:#bbf7d0;font-size:10px;margin-top:2px">Used at: Province Hub · District Office · School</div>
+      </div>
+      <div style="padding:13px">
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;font-weight:700;color:#475569;display:block;margin-bottom:4px">Receiving at location:</label>
+          <select id="recv-loc" style="width:100%;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px">
+            <option>Mt Hagen Province Hub</option>
+            <option>Enga Province Hub — Wabag</option>
+            <option>Lae Province Hub</option>
+            <option>North Waghi District Education Office</option>
+            <option>Laiagam District Education Office</option>
+            <option>Lae Urban District Education Office</option>
+            <option>Banz Primary School</option>
+            <option>Laiagam Community School</option>
+            <option>Lae Secondary School</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;font-weight:700;color:#475569;display:block;margin-bottom:4px">Scan incoming carton:</label>
+          <div style="display:flex;gap:7px">
+            <input id="recv-scan-input" type="text" placeholder="Enter carton ID to receive..." style="flex:1;padding:7px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:11px;font-family:monospace">
+            <button onclick="scanReceive()" style="padding:7px 14px;background:#166534;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer">Receive</button>
+          </div>
+          <div style="font-size:9px;color:#94a3b8;margin-top:4px">Try: PNG-LEAP-2026-00001 &nbsp;·&nbsp; PNG-LEAP-2026-00507 &nbsp;·&nbsp; PNG-LEAP-2026-00701</div>
+        </div>
+        <div id="recv-result" style="display:none;border-radius:6px;padding:10px 12px;font-size:11px;margin-bottom:10px"></div>
+        <div style="font-size:10px;font-weight:700;color:#475569;margin-bottom:6px">Recent scans at this location:</div>
+        <div id="recv-log" style="border:1px solid #e2e8f0;border-radius:6px;overflow:hidden">
+          <div style="padding:8px 10px;font-size:10px;color:#94a3b8;text-align:center">No scans yet — scan a carton above to begin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="opg" id="opg-classroom">
+  <div class="flow-note" style="margin-top:4px">
+    <strong>&#127959; How GEMS feeds the MIS dashboard — Classroom Construction</strong>
+    A field officer visits the school, completes this GEMS form on their phone, uploads GPS-tagged photos of each completed works item, and submits. The submission is automatically counted toward the province's Complete total on the dashboard. The GPS auto-capture proves the officer was physically on site — it cannot be submitted remotely.
+  </div>
+  
+<div class="kframe">
+  <div class="ktopbar" style="background:#166534">
+    <span>LEAP PNG — Classroom Construction Verification (C3) · GEMS Field Form</span>
+    <small>GEMS / KoboToolbox · kf.kobotoolbox.org</small>
+  </div>
+  <div class="kmeta" style="background:#f0fdf4;border-bottom:1px solid #dcfce7">
+    <div class="mc"><span>Submitted by</span><strong>James Kama, WHP PDoE Field Officer</strong></div>
+    <div class="mc"><span>Date &amp; time</span><strong>22 Mar 2026 · 09:47 AM</strong></div>
+    <div class="mc"><span>Submission ID</span><strong>SUB-CROOM-20260322-3847</strong></div>
+  </div>
+
+  <div class="ksec">
+    <h4>A. School identification &amp; GPS</h4>
+    <div class="fg">
+      <div class="f"><label>School code (NDoE EMIS)</label><value>PNG3847</value></div>
+      <div class="f"><label>School name</label><value>Banz Primary School</value></div>
+      <div class="f"><label>Province</label><value>Western Highlands</value></div>
+      <div class="f"><label>District</label><value>North Waghi</value></div>
+    </div>
+    <div class="gps-row">
+      <div style="font-size:20px">&#128205;</div>
+      <div>
+        <div style="font-weight:700;color:#0c4a6e;font-size:11px">GPS captured at classroom building entrance — auto by GEMS/KoboToolbox</div>
+        <div style="color:#0369a1">Lat: -5.8247 &nbsp;·&nbsp; Lon: 144.3018 &nbsp;·&nbsp; Accuracy: 3.2m</div>
+        <div class="gps-note">Cannot be manually edited · timestamp-locked at submission · proves officer was physically on site</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ksec">
+    <h4>B. Grant &amp; contractor details</h4>
+    <div class="fg">
+      <div class="f"><label>Grant status</label><value style="color:#166534">Works completed</value></div>
+      <div class="f"><label>Grant amount (PGK)</label><value>PGK 48,500</value></div>
+      <div class="f"><label>Contractor name</label><value>Highlands Build Ltd</value></div>
+      <div class="f"><label>Contract reference</label><value>WHP-CROOM-2025-047</value></div>
+    </div>
+  </div>
+
+  <div class="ksec">
+    <h4>C. Classroom construction works — verified by direct observation</h4>
+    <div class="cklist">
+      <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Classroom walls — plastered and painted</div>
+      <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Roof — replaced, no leaks observed</div>
+      <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Latrines — gender-separated, 3 stalls each, functional locks</div>
+      <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>WaSH station — handwashing basin + water storage tank</div>
+      <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Accessibility ramp — constructed at main entrance</div>
+      <div class="ci cn"><div class="cico" style="background:#dc2626;color:#fff">&#10007;</div>Solar lighting — NOT installed</div>
+    </div>
+    <div class="warn-box" style="margin-top:8px"><strong>Field officer note:</strong> Solar lighting removed from scope by Board of Management — cost overrun approved by PDoE Supervisor on 15 Mar 2026. All other agreed classroom works fully complete and verified on site.</div>
+  </div>
+
+  <div class="ksec">
+    <h4>D. Photo evidence — GPS-tagged, uploaded from site</h4>
+    <div class="pstrip">
+      <div class="pbox"><div class="pico">&#127968;</div><div>Classroom exterior</div><div style="font-size:9px">IMG_20260322_0947.jpg</div></div>
+      <div class="pbox"><div class="pico">&#127685;</div><div>Latrine block</div><div style="font-size:9px">IMG_20260322_0952.jpg</div></div>
+      <div class="pbox"><div class="pico">&#128688;</div><div>WaSH station</div><div style="font-size:9px">IMG_20260322_0958.jpg</div></div>
+    </div>
+    <div style="font-size:9px;color:#94a3b8;margin-top:6px">All photos GPS-tagged and timestamped automatically · cannot be pre-taken or retroactively uploaded · stored in GEMS/KoboToolbox media archive with full audit trail</div>
+  </div>
+
+  <div class="kfooter">
+    <span>Online submission via GEMS · synced immediately · 22 Mar 2026 09:47 UTC+10</span>
+    <span class="sbadge" style="background:#16a34a;color:#fff">Submitted &#10003;</span>
+  </div>
+</div>
+
+</div>
+
+<div class="opg" id="opg-ict">
+  <div class="flow-note" style="margin-top:4px">
+    <strong>&#128187; How GEMS feeds the MIS dashboard — ICT Hub Refurbishment</strong>
+    The field officer visits the school once and assesses all five contractors in a single GEMS form submission. Each contractor section has its own status and photo evidence. The auto-calculated components complete score (0–5) determines the hub's overall status on the dashboard map. A hub is only marked Complete when all 5 components are confirmed.
+  </div>
+  
+<div class="kframe">
+  <div class="ktopbar" style="background:#854d0e">
+    <span>LEAP PNG — ICT Hub Refurbishment Monitoring (C3) · GEMS Field Form</span>
+    <small>GEMS / KoboToolbox · kf.kobotoolbox.org</small>
+  </div>
+  <div class="kmeta" style="background:#fffbeb;border-bottom:1px solid #fde68a">
+    <div class="mc"><span>Submitted by</span><strong>Grace Timi, Morobe PDoE ICT Officer</strong></div>
+    <div class="mc"><span>Date &amp; time</span><strong>19 Mar 2026 · 14:22 PM</strong></div>
+    <div class="mc"><span>Submission ID</span><strong>SUB-ICT-20260319-7214</strong></div>
+  </div>
+
+  <!-- A: School ID -->
+  <div class="ksec">
+    <h4>A. School identification &amp; GPS</h4>
+    <div class="fg">
+      <div class="f"><label>School code (NDoE EMIS)</label><value>PNG7214</value></div>
+      <div class="f"><label>School name</label><value>Lae Secondary School</value></div>
+      <div class="f"><label>Province</label><value>Morobe</value></div>
+      <div class="f"><label>Hub designation</label><value>LEAP Digital Hub — Morobe Hub 03</value></div>
+    </div>
+    <div class="gps-row">
+      <div style="font-size:20px">&#128205;</div>
+      <div>
+        <div style="font-weight:700;color:#0c4a6e;font-size:11px">GPS captured at hub room entrance — auto by GEMS/KoboToolbox</div>
+        <div style="color:#0369a1">Lat: -6.7348 &nbsp;·&nbsp; Lon: 147.0004 &nbsp;·&nbsp; Accuracy: 4.8m</div>
+        <div class="gps-note">Cannot be manually edited · timestamp-locked at submission · proves officer was physically on site</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- B: Power supply -->
+  <div class="ksec">
+    <h4>B. School power supply — assessed first as prerequisite for all contractors</h4>
+    <div class="fg">
+      <div class="f"><label>Mains power connection</label><value style="color:#166534">Yes — connected</value></div>
+      <div class="f"><label>Power reliability</label><value style="color:#854d0e">Intermittent (frequent outages)</value></div>
+      <div class="f"><label>Avg hours mains power / day</label><value>6–8 hours (mornings only)</value></div>
+      <div class="f"><label>Power backup in place?</label><value style="color:#166534">Yes — see Section G</value></div>
+    </div>
+    <div class="warn-box"><strong>Field officer note:</strong> Mains power typically available mornings only. Power backup (solar + battery) is critical for afternoon classes and must cover all devices and the router. Flagged to connectivity contractor.</div>
+  </div>
+
+  <!-- C–G: Contractor sections -->
+  <div class="ksec">
+    <h4>C–G. Contractor assessments — five components, one form, one visit</h4>
+    <div style="font-size:10px;color:#64748b;margin-bottom:10px">Each contractor assessed separately with its own status and photo evidence</div>
+
+    <!-- C: Room -->
+    <div class="contractor-sec">
+      <div class="contractor-hdr">
+        <div>
+          <div class="contractor-title">C. Room refurbishment</div>
+          <div style="font-size:10px;color:#64748b">Contractor: Morobe Civil Works Pty Ltd &nbsp;·&nbsp; Contract: MOR-ROOM-2025-014</div>
+        </div>
+        <span class="c-status cs-complete">Complete</span>
+      </div>
+      <div class="cklist">
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Room dimensions adequate (9m × 7m verified)</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Walls plastered and painted</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Flooring — tiled throughout</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Windows and doors with locks</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Ventilation — louvres installed</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Security grilles on all windows</div>
+      </div>
+      <div class="pstrip" style="margin-top:8px">
+        <div class="pbox"><div class="pico">&#127968;</div><div>Full room interior</div><div style="font-size:9px">IMG_0319_room1.jpg</div></div>
+        <div class="pbox"><div class="pico">&#128274;</div><div>Security grilles</div><div style="font-size:9px">IMG_0319_room2.jpg</div></div>
+      </div>
+    </div>
+
+    <!-- D: Furniture -->
+    <div class="contractor-sec">
+      <div class="contractor-hdr">
+        <div>
+          <div class="contractor-title">D. Furniture — desks &amp; chairs</div>
+          <div style="font-size:10px;color:#64748b">Contractor: PNG Office Supplies Ltd &nbsp;·&nbsp; Contract: MOR-FURN-2025-014</div>
+        </div>
+        <span class="c-status cs-complete">Complete</span>
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <div class="f"><label>Student desks ordered</label><value>25</value></div>
+        <div class="f"><label>Student desks in room</label><value style="color:#166534">25 ✓</value></div>
+        <div class="f"><label>Chairs ordered</label><value>52</value></div>
+        <div class="f"><label>Chairs in room</label><value style="color:#166534">52 ✓</value></div>
+      </div>
+      <div class="cklist">
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Teacher desk and chair in place</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>All furniture undamaged, no sharp edges</div>
+      </div>
+      <div class="pstrip" style="margin-top:8px">
+        <div class="pbox"><div class="pico">&#128196;</div><div>Desks arranged in room</div><div style="font-size:9px">IMG_0319_furn1.jpg</div></div>
+      </div>
+    </div>
+
+    <!-- E: Devices -->
+    <div class="contractor-sec">
+      <div class="contractor-hdr">
+        <div>
+          <div class="contractor-title">E. Devices &amp; equipment</div>
+          <div style="font-size:10px;color:#64748b">Contractor: TechPNG Solutions &nbsp;·&nbsp; Contract: MOR-DEV-2025-014</div>
+        </div>
+        <span class="c-status cs-complete">Complete</span>
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <div class="f"><label>Device type</label><value>Desktop computers</value></div>
+        <div class="f"><label>Ordered / Delivered</label><value style="color:#166534">25 ordered · 25 delivered ✓</value></div>
+        <div class="f"><label>Tested functional</label><value style="color:#166534">25 / 25 ✓</value></div>
+        <div class="f"><label>Teacher workstation</label><value style="color:#166534">Installed &amp; functional ✓</value></div>
+      </div>
+      <div class="cklist">
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>NDoE-specified software loaded on all devices</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>All devices powered on and tested during visit</div>
+      </div>
+      <div class="pstrip" style="margin-top:8px">
+        <div class="pbox"><div class="pico">&#128187;</div><div>All devices on desks</div><div style="font-size:9px">IMG_0319_dev1.jpg</div></div>
+        <div class="pbox"><div class="pico">&#128444;</div><div>Screen showing software</div><div style="font-size:9px">IMG_0319_dev2.jpg</div></div>
+      </div>
+    </div>
+
+    <!-- F: Connectivity -->
+    <div class="contractor-sec">
+      <div class="contractor-hdr">
+        <div>
+          <div class="contractor-title">F. Internet connectivity</div>
+          <div style="font-size:10px;color:#64748b">Provider: Digicel PNG &nbsp;·&nbsp; Connection type: 4G LTE &nbsp;·&nbsp; Contract: MOR-CONN-2025-014</div>
+        </div>
+        <span class="c-status cs-progress">In progress</span>
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <div class="f"><label>Connection at time of visit</label><value style="color:#854d0e">Intermittent — drops frequently</value></div>
+        <div class="f"><label>Download speed tested</label><value style="color:#854d0e">3.2 Mbps (target: ≥10 Mbps)</value></div>
+        <div class="f"><label>Router installed</label><value style="color:#166534">Yes</value></div>
+        <div class="f"><label>WiFi covers full room?</label><value style="color:#854d0e">Partially</value></div>
+      </div>
+      <div class="warn-box"><strong>Field officer note:</strong> Digicel fibre installation incomplete — outdoor conduit not finished. Temporary 4G router in place. Re-inspection scheduled after 28 Mar 2026 when contractor returns. Hub cannot be marked Complete until connectivity reaches ≥10 Mbps.</div>
+      <div class="pstrip" style="margin-top:8px">
+        <div class="pbox"><div class="pico">&#128268;</div><div>Router / modem</div><div style="font-size:9px">IMG_0319_conn1.jpg</div></div>
+      </div>
+    </div>
+
+    <!-- G: Power backup -->
+    <div class="contractor-sec">
+      <div class="contractor-hdr">
+        <div>
+          <div class="contractor-title">G. Power backup system</div>
+          <div style="font-size:10px;color:#64748b">Contractor: Solar Pacific Ltd &nbsp;·&nbsp; Type: Solar panels + battery storage &nbsp;·&nbsp; Contract: MOR-PWR-2025-014</div>
+        </div>
+        <span class="c-status cs-complete">Complete</span>
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <div class="f"><label>System type</label><value>Solar + battery storage</value></div>
+        <div class="f"><label>Battery capacity</label><value>10 kWh</value></div>
+        <div class="f"><label>Estimated backup runtime</label><value>6 hours at full hub load</value></div>
+        <div class="f"><label>Tested functional during visit?</label><value style="color:#166534">Yes — mains isolated, backup activated ✓</value></div>
+      </div>
+      <div class="cklist">
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Covers all 25 devices + teacher workstation</div>
+        <div class="ci cy"><div class="cico" style="background:#16a34a;color:#fff">&#10003;</div>Router also on backup circuit</div>
+      </div>
+      <div class="pstrip" style="margin-top:8px">
+        <div class="pbox"><div class="pico">&#9728;</div><div>Solar panels (roof)</div><div style="font-size:9px">IMG_0319_pwr1.jpg</div></div>
+        <div class="pbox"><div class="pico">&#128267;</div><div>Battery bank</div><div style="font-size:9px">IMG_0319_pwr2.jpg</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- H: Overall -->
+  <div class="ksec">
+    <h4>H. Overall hub assessment — auto-calculated from sections C–G</h4>
+    <div class="fg">
+      <div class="f"><label>Components complete (auto)</label><value style="color:#854d0e">4 of 5 — connectivity pending</value></div>
+      <div class="f"><label>Overall hub status</label><value style="color:#854d0e">Mostly operational — re-inspection required</value></div>
+    </div>
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:8px 11px;font-size:10px;color:#92400e;margin-top:6px">
+      <strong>Priority action:</strong> Digicel PNG — complete fibre installation by 28 Mar 2026 and achieve ≥10 Mbps download. Re-inspection required before hub is marked Complete on dashboard.
+    </div>
+  </div>
+
+  <div class="kfooter">
+    <span>Online submission via GEMS · synced immediately · 19 Mar 2026 14:22 UTC+10</span>
+    <span class="sbadge" style="background:#d97706;color:#fff">In Progress &#9654;</span>
+  </div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">Carton detail</div><span class="modal-close" onclick="closeModal()">&#10005;</span></div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// OUTER NAV
+document.getElementById('outer-nav').addEventListener('click',function(e){
+  const tab=e.target.closest('.otab');if(!tab)return;
+  document.querySelectorAll('.otab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  document.querySelectorAll('.opg').forEach(p=>p.classList.remove('on'));
+  document.getElementById('opg-'+tab.dataset.otab).classList.add('on');
+});
+// INNER NAV
+document.addEventListener('click',function(e){
+  const itab=e.target.closest('.itab');if(!itab)return;
+  const nav=itab.closest('.inner-nav');if(!nav)return;
+  nav.querySelectorAll('.itab').forEach(t=>t.classList.remove('on'));
+  itab.classList.add('on');
+  document.querySelectorAll('.ipg').forEach(p=>p.classList.remove('on'));
+  const target=document.getElementById('ipg-'+itab.dataset.itab);
+  if(target)target.classList.add('on');
+});
+
+
+const SCHOOL_EXTRAS={
+  'PNG3847':{expDate:'10 Feb 2026'},'PNG3851':{expDate:'10 Feb 2026'},
+  'PNG3862':{expDate:'11 Feb 2026'},'PNG3874':{expDate:'10 Feb 2026'},
+  'PNG4120':{expDate:'15 Feb 2026'},'PNG4134':{expDate:'16 Feb 2026'},
+  'PNG4158':{expDate:'20 Feb 2026'},'PNG7214':{expDate:'12 Mar 2026'},
+  'PNG7228':{expDate:'12 Mar 2026'},'PNG7245':{expDate:'20 Mar 2026'},
+};
+
+
+function renderSchoolTable(tbodyId,schools,btnFn){
+  const isShip=tbodyId==='school-tbody2';
+  document.getElementById(tbodyId).innerHTML=schools.map(s=>{
+    const ex=SCHOOL_EXTRAS[s.id]||{expDate:'—'};
+    if(isShip){return '<tr onclick="'+btnFn+"('"+s.id+"')"+'"><td style="font-family:monospace;font-size:10px">'+s.id+'</td><td style="font-weight:600">'+s.name+'</td><td>'+s.province+'</td><td>'+s.district+'</td><td style="font-family:monospace;font-size:10px">'+s.shipmentId+'</td><td style="text-align:center;font-size:10px">'+ex.expDate+'</td><td style="text-align:center;font-weight:600">'+s.expectedCartons+'</td><td style="text-align:center;color:'+(s.deliveredCartons===s.expectedCartons?'#166534':'#854d0e')+';font-weight:600">'+s.deliveredCartons+'</td><td>'+statusPill(s.status)+'</td><td><button class="act-btn" onclick="event.stopPropagation();'+btnFn+"('"+s.id+"')"+'">'+'View</button></td></tr>';}
+    return '<tr onclick="'+btnFn+"('"+s.id+"')"+'"><td style="font-family:monospace;font-size:10px">'+s.id+'</td><td style="font-weight:600">'+s.name+'</td><td>'+s.province+'</td><td>'+s.district+'</td><td style="font-family:monospace;font-size:10px">'+s.shipmentId+'</td><td style="text-align:center;font-size:10px">'+ex.expDate+'</td><td style="text-align:center;font-weight:600">'+s.expectedCartons+'</td><td style="text-align:center;color:'+(s.deliveredCartons===s.expectedCartons?'#166534':'#854d0e')+';font-weight:600">'+s.deliveredCartons+'</td><td style="text-align:center;color:'+(s.missing>0?'#991b1b':'#94a3b8')+'">'+( s.missing||'—')+'</td><td style="text-align:center;color:'+(s.damaged>0?'#854d0e':'#94a3b8')+'">'+(s.damaged||'—')+'</td><td>'+statusPill(s.status)+'</td><td><button class="act-btn" onclick="event.stopPropagation();'+btnFn+"('"+s.id+"')"+'">View</button></td></tr>';
+  }).join('');
+}
+
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════════════════
+const MATERIALS = {
+  'TG-PREP-LIT': {name:'Teacher Guide — Prep Literacy', grade:'Prep', cat:'Teacher Guide', qty:30},
+  'TG-G1-LIT':  {name:'Teacher Guide — Grade 1 Literacy', grade:'Grade 1', cat:'Teacher Guide', qty:30},
+  'TG-G2-LIT':  {name:'Teacher Guide — Grade 2 Literacy', grade:'Grade 2', cat:'Teacher Guide', qty:30},
+  'TG-G3-NUM':  {name:'Teacher Guide — Grade 3 Numeracy', grade:'Grade 3', cat:'Teacher Guide', qty:30},
+  'SR-PREP':    {name:'Student Reader — Prep', grade:'Prep', cat:'Student Reader', qty:30},
+  'SR-G1':      {name:'Student Reader — Grade 1', grade:'Grade 1', cat:'Student Reader', qty:30},
+  'SR-G2':      {name:'Student Reader — Grade 2', grade:'Grade 2', cat:'Student Reader', qty:30},
+  'SR-G3':      {name:'Student Reader — Grade 3', grade:'Grade 3', cat:'Student Reader', qty:30},
+};
+
+const CHAIN = [
+  'Port Moresby Printing Facility',
+  'Central Warehouse — Port Moresby',
+  'Province Distribution Hub',
+  'District Education Office',
+  'School',
+];
+
+// Scan histories for individual cartons
+function mkScans(school, province, status, flag){
+  const pHub = province==='Western Highlands'?'Mt Hagen Province Hub':province==='Enga'?'Enga Province Hub — Wabag':'Lae Province Hub';
+  const dist = province==='Western Highlands'?'North Waghi District Education Office':province==='Enga'?'Laiagam District Education Office':'Lae Urban District Education Office';
+  const base = [
+    {dt:'05 Feb 2026, 07:30', loc:'Port Moresby Printing Facility', ev:'packed', off:'Print Manager — J. Ovia'},
+    {dt:'07 Feb 2026, 09:15', loc:'Central Warehouse — Port Moresby', ev:'dispatched', off:'Warehouse Officer — P. Tate'},
+    {dt:'08 Feb 2026, 14:30', loc:pHub, ev:'received', off:'Province Store Officer'},
+    {dt:'09 Feb 2026, 08:00', loc:pHub, ev:'dispatched', off:'Province Transport Officer'},
+    {dt:'09 Feb 2026, 16:45', loc:dist, ev:'received', off:'District Education Officer'},
+    {dt:'10 Feb 2026, 07:30', loc:dist, ev:'dispatched', off:'District Driver'},
+  ];
+  if(status==='delivered') base.push({dt:'10 Feb 2026, 14:22', loc:school, ev:'delivered', off:'School Principal / Head Teacher'});
+  if(flag==='damaged') base.push({dt:'10 Feb 2026, 14:22', loc:school, ev:'damaged', off:'School Principal — damage noted on arrival'});
+  if(flag==='missing') base.pop(); // last dispatch never scanned at school
+  if(status==='at-district'){base.pop();base.pop();} // only at district
+  if(status==='at-province'){base.pop();base.pop();base.pop();base.pop();}
+  return base;
+}
+
+function mkScansEnga(school, status){
+  const base = [
+    {dt:'10 Feb 2026, 10:00', loc:'Port Moresby Printing Facility', ev:'packed', off:'Print Manager — J. Ovia'},
+    {dt:'12 Feb 2026, 08:00', loc:'Central Warehouse — Port Moresby', ev:'dispatched', off:'Warehouse Officer — P. Tate'},
+    {dt:'13 Feb 2026, 16:30', loc:'Enga Province Hub — Wabag', ev:'received', off:'Province Store Officer'},
+    {dt:'14 Feb 2026, 07:45', loc:'Enga Province Hub — Wabag', ev:'dispatched', off:'Province Transport Officer'},
+  ];
+  if(status==='at-district'){
+    base.push({dt:'14 Feb 2026, 15:20', loc:'Laiagam District Education Office', ev:'received', off:'District Education Officer'});
+  }
+  if(status==='delivered'){
+    base.push({dt:'14 Feb 2026, 15:20', loc:'Laiagam District Education Office', ev:'received', off:'District Education Officer'});
+    base.push({dt:'15 Feb 2026, 08:10', loc:'Laiagam District Education Office', ev:'dispatched', off:'District Driver'});
+    base.push({dt:'15 Feb 2026, 14:00', loc:school, ev:'delivered', off:'School Principal'});
+  }
+  return base;
+}
+
+// SCHOOLS data
+const SCHOOLS = [
+  // Western Highlands
+  {id:'PNG3847', name:'Banz Primary School', province:'Western Highlands', district:'North Waghi',
+   shipmentId:'SH-PNG-2026-0041', expectedCartons:18, deliveredCartons:18, missing:0, damaged:0,
+   status:'confirmed', confirmedBy:'H. Kama (Principal)', confirmedDate:'10 Feb 2026 14:22',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':3,'SR-G1':4,'SR-G2':4,'SR-G3':3},
+   cartonStart:1, cartonCount:18, cartonStatus:'delivered', cartonProvince:'Western Highlands', note:''},
+
+  {id:'PNG3851', name:'Mt Hagen Primary School', province:'Western Highlands', district:'WH Urban',
+   shipmentId:'SH-PNG-2026-0042', expectedCartons:24, deliveredCartons:24, missing:0, damaged:2,
+   status:'exception', confirmedBy:'P. Mondo (Deputy Principal)', confirmedDate:'10 Feb 2026 11:45',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':4,'SR-G1':5,'SR-G2':5,'SR-G3':6},
+   cartonStart:101, cartonCount:24, cartonStatus:'delivered', cartonProvince:'Western Highlands',
+   note:'2 cartons of SR-G2 (cartons PNG-LEAP-2026-00116, 00117) water damaged in transit — contents unusable'},
+
+  {id:'PNG3862', name:'Minj Primary School', province:'Western Highlands', district:'Jiwaka',
+   shipmentId:'SH-PNG-2026-0043', expectedCartons:16, deliveredCartons:13, missing:3, damaged:0,
+   status:'partial', confirmedBy:'R. Kinjip (Principal)', confirmedDate:'11 Feb 2026 09:15',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':2,'SR-G1':3,'SR-G2':3,'SR-G3':4},
+   cartonStart:201, cartonCount:16, cartonStatus:'partial', cartonProvince:'Western Highlands',
+   note:'3 cartons of TG-G3-NUM not in delivery — last scan at Mt Hagen Province Hub 09 Feb. Query raised with province store officer.'},
+
+  {id:'PNG3874', name:'Togoba Secondary School', province:'Western Highlands', district:'WH Urban',
+   shipmentId:'SH-PNG-2026-0044', expectedCartons:22, deliveredCartons:22, missing:0, damaged:0,
+   status:'confirmed', confirmedBy:'B. Mel (Principal)', confirmedDate:'10 Feb 2026 15:00',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':3,'SR-G1':5,'SR-G2':5,'SR-G3':5},
+   cartonStart:301, cartonCount:22, cartonStatus:'delivered', cartonProvince:'Western Highlands', note:''},
+
+  // Enga
+  {id:'PNG4120', name:'Wabag Primary School', province:'Enga', district:'Wabag',
+   shipmentId:'SH-PNG-2026-0051', expectedCartons:14, deliveredCartons:14, missing:0, damaged:0,
+   status:'confirmed', confirmedBy:'A. Piapi (Principal)', confirmedDate:'15 Feb 2026 14:00',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':2,'SR-G1':3,'SR-G2':3,'SR-G3':2},
+   cartonStart:401, cartonCount:14, cartonStatus:'delivered', cartonProvince:'Enga', note:''},
+
+  {id:'PNG4134', name:'Laiagam Community School', province:'Enga', district:'Laiagam',
+   shipmentId:'SH-PNG-2026-0052', expectedCartons:12, deliveredCartons:0, missing:0, damaged:0,
+   status:'transit', confirmedBy:'—', confirmedDate:'—',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':2,'SR-G1':2,'SR-G2':2,'SR-G3':2},
+   cartonStart:501, cartonCount:12, cartonStatus:'at-district', cartonProvince:'Enga',
+   note:'All 12 cartons at Laiagam District Education Office since 14 Feb. Delivery to school scheduled 20 Feb — road conditions.'},
+
+  {id:'PNG4158', name:'Kandep Primary School', province:'Enga', district:'Kandep',
+   shipmentId:'SH-PNG-2026-0053', expectedCartons:10, deliveredCartons:0, missing:0, damaged:0,
+   status:'transit', confirmedBy:'—', confirmedDate:'—',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':1,'SR-G1':2,'SR-G2':2,'SR-G3':1},
+   cartonStart:601, cartonCount:10, cartonStatus:'at-province', cartonProvince:'Enga',
+   note:'All 10 cartons at Enga Province Hub since 14 Feb. District transport to Kandep not available until roads passable.'},
+
+  // Morobe
+  {id:'PNG7214', name:'Lae Secondary School', province:'Morobe', district:'Lae Urban',
+   shipmentId:'SH-PNG-2026-0061', expectedCartons:28, deliveredCartons:28, missing:0, damaged:0,
+   status:'confirmed', confirmedBy:'G. Timi (School Secretary)', confirmedDate:'12 Mar 2026 10:30',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':4,'SR-G1':6,'SR-G2':7,'SR-G3':7},
+   cartonStart:701, cartonCount:28, cartonStatus:'delivered', cartonProvince:'Morobe', note:''},
+
+  {id:'PNG7228', name:'Bumayong Primary School', province:'Morobe', district:'Lae Urban',
+   shipmentId:'SH-PNG-2026-0062', expectedCartons:20, deliveredCartons:20, missing:0, damaged:0,
+   status:'exception', confirmedBy:'K. Sela (Principal)', confirmedDate:'12 Mar 2026 11:15',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':3,'SR-G1':4,'SR-G2':4,'SR-G3':5},
+   cartonStart:801, cartonCount:20, cartonStatus:'delivered', cartonProvince:'Morobe',
+   note:'Cartons PNG-LEAP-2026-00814 to 00817: labelled SR-G1 but contain SR-G2 books. Incorrect packing. Replacement cartons requested from warehouse.'},
+
+  {id:'PNG7245', name:'Nawaeb Secondary School', province:'Morobe', district:'Nawaeb',
+   shipmentId:'SH-PNG-2026-0063', expectedCartons:18, deliveredCartons:0, missing:0, damaged:0,
+   status:'pending', confirmedBy:'—', confirmedDate:'—',
+   materials:{'TG-PREP-LIT':1,'TG-G1-LIT':1,'TG-G2-LIT':1,'TG-G3-NUM':1,'SR-PREP':3,'SR-G1':4,'SR-G2':4,'SR-G3':3},
+   cartonStart:901, cartonCount:18, cartonStatus:'pending', cartonProvince:'Morobe',
+   note:'Shipment not yet dispatched from Central Warehouse. Held pending printing completion for SR-G3. Expected dispatch 20 Mar 2026.'},
+];
+
+// ═══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════════════════
+function statusPill(st){
+  const m = {confirmed:['p-conf','Confirmed'],exception:['p-exc','Exception'],
+              partial:['p-part','Partial delivery'],transit:['p-trans','In transit'],
+              pending:['p-pend','Not dispatched']};
+  const [cls,label] = m[st]||['p-pend','Unknown'];
+  return `<span class="pill ${cls}">${label}</span>`;
+}
+
+function getCartons(school){
+  const cartons = [];
+  let n = school.cartonStart;
+  const matKeys = Object.keys(school.materials);
+  let idx = 0;
+  for(const matKey of matKeys){
+    const count = school.materials[matKey];
+    for(let i=0;i<count;i++){
+      const id = 'PNG-LEAP-2026-' + String(n).padStart(5,'0');
+      let st = school.cartonStatus;
+      let flag = '';
+      // special cases
+      if(school.id==='PNG3851' && (n===school.cartonStart+15||n===school.cartonStart+16)){st='delivered';flag='damaged';}
+      if(school.id==='PNG3862' && matKey==='TG-G3-NUM'){st='missing';flag='missing';}
+      if(school.id==='PNG7228' && n>=school.cartonStart+13&&n<=school.cartonStart+16){flag='wrong';}
+      cartons.push({id,material:matKey,status:st,flag,school:school.name,province:school.province});
+      n++;
+    }
+  }
+  return cartons;
+}
+
+function cartonStatusLabel(st,flag){
+  if(flag==='missing') return `<span class="c-missing">&#9888; Missing</span>`;
+  if(flag==='damaged') return `<span class="c-damaged">&#9888; Damaged</span>`;
+  if(flag==='wrong') return `<span class="c-damaged">&#9888; Wrong material</span>`;
+  if(st==='delivered') return `<span class="c-delivered">&#10003; Delivered</span>`;
+  if(st==='at-district') return `<span class="c-transit">At district</span>`;
+  if(st==='at-province') return `<span class="c-transit">At province hub</span>`;
+  if(st==='pending') return `<span style="color:#94a3b8">Not dispatched</span>`;
+  return `<span class="c-transit">${st}</span>`;
+}
+
+function lastLocation(st, flag, school, province){
+  const pHub = province==='Western Highlands'?'Mt Hagen Province Hub':province==='Enga'?'Enga Province Hub — Wabag':'Lae Province Hub';
+  const dist = province==='Western Highlands'?'North Waghi District Education Office':province==='Enga'?'Laiagam District Education Office':'Lae Urban District Education Office';
+  if(flag==='missing') return 'Mt Hagen Province Hub ⚠';
+  if(st==='delivered'||flag==='damaged'||flag==='wrong') return school;
+  if(st==='at-district') return dist;
+  if(st==='at-province') return pHub;
+  return 'Central Warehouse — Port Moresby';
+}
+
+function lastScan(st, flag){
+  if(st==='delivered'||flag==='damaged'||flag==='wrong') return '10–12 Feb / Mar 2026';
+  if(st==='at-district') return '14 Feb 2026, 15:20';
+  if(st==='at-province') return '14 Feb 2026, 10:15';
+  if(flag==='missing') return '09 Feb 2026, 08:00';
+  return '—';
+}
+
+function chainVis(school){
+  const steps=['Warehouse','Province hub','District office','School'];
+  const st = school.cartonStatus;
+  const reached = st==='at-province'?1:st==='at-district'?2:st==='delivered'?3:st==='pending'?0:3;
+  let h='<div class="chain-vis">';
+  steps.forEach((s,i)=>{
+    const cls = i<reached?'cv-done':i===reached?'cv-curr':'cv-pend';
+    h+=`<div class="cv-step"><div class="cv-dot ${cls}"></div><span class="cv-label" style="font-size:9px;color:${i<reached?'#166534':i===reached?'#854d0e':'#94a3b8'};font-weight:${i<=reached?'600':'400'}">${s}</span></div>`;
+    if(i<steps.length-1) h+=`<span class="cv-arr">→</span>`;
+  });
+  return h+'</div>';
+}
+
+function buildCartonRows(school){
+  const cartons = getCartons(school);
+  return cartons.map(c=>{
+    const m = MATERIALS[c.material];
+    const flag = c.flag?`<span style="background:#fef2f2;color:#991b1b;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600">&#9888; ${c.flag==='missing'?'Missing':c.flag==='damaged'?'Damaged':c.flag==='wrong'?'Wrong item':'Flag'}</span>`:'';
+    return `<tr onclick="openCartonModal('${c.id}','${school.id}')">
+      <td style="font-family:monospace;font-size:10px">${c.id}</td>
+      <td>${m.name}</td><td>${m.grade}</td>
+      <td style="text-align:center">${m.qty}</td>
+      <td>${cartonStatusLabel(c.status,c.flag)}</td>
+      <td style="font-size:10px;color:#64748b">${lastLocation(c.status,c.flag,school.name,school.province)}</td>
+      <td style="font-size:10px;color:#94a3b8">${lastScan(c.status,c.flag)}</td>
+      <td>${flag}</td>
+    </tr>`;
+  }).join('');
+}
+
+function buildDetailPanel(school, panelId, metaId, alertsId, chainId, cartonsId){
+  document.getElementById(metaId).innerHTML = `
+    <div class="dm"><label>Shipment ID</label><value style="font-family:monospace">${school.shipmentId}</value></div>
+    <div class="dm"><label>School</label><value>${school.name}</value></div>
+    <div class="dm"><label>District / Province</label><value>${school.district} · ${school.province}</value></div>
+    <div class="dm"><label>Cartons: dispatched / expected</label><value>${school.deliveredCartons} delivered of ${school.expectedCartons} expected</value></div>
+  `;
+  let alerts = '';
+  if(school.status==='confirmed'&&school.damaged===0&&school.missing===0){
+    alerts=`<div class="alert-box ab-ok">&#10003; All ${school.expectedCartons} cartons delivered and confirmed by ${school.confirmedBy} on ${school.confirmedDate}</div>`;
+  }
+  if(school.status==='exception'&&school.damaged>0){
+    alerts=`<div class="alert-box ab-warn">&#9888; Exception: ${school.damaged} cartons delivered damaged — ${school.note}</div>`;
+  }
+  if(school.status==='partial'){
+    alerts=`<div class="alert-box ab-err">&#9888; Partial delivery: ${school.missing} cartons missing — ${school.note}</div>`;
+  }
+  if(school.status==='exception'&&school.damaged===0){
+    alerts=`<div class="alert-box ab-warn">&#9888; Exception: ${school.note}</div>`;
+  }
+  if(school.status==='transit'){
+    alerts=`<div class="alert-box ab-warn" style="background:#dbeafe;border-color:#93c5fd;color:#1e40af">&#128337; In transit: ${school.note}</div>`;
+  }
+  if(school.status==='pending'){
+    alerts=`<div class="alert-box ab-warn" style="background:#f1f5f9;border-color:#cbd5e1;color:#475569">&#9201; Not yet dispatched: ${school.note}</div>`;
+  }
+  document.getElementById(alertsId).innerHTML = alerts;
+  document.getElementById(chainId).innerHTML = chainVis(school);
+  document.getElementById(cartonsId).innerHTML = buildCartonRows(school);
+  document.getElementById(panelId).classList.add('on');
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD — SCHOOL TABLE
+// ═══════════════════════════════════════════════════════════════════════════
+let selectedSchool = null;
+
+function renderSchoolTable(tbodyId, schools, btnFn){
+  document.getElementById(tbodyId).innerHTML = schools.map(s=>`
+    <tr onclick="${btnFn}('${s.id}')">
+      <td style="font-family:monospace">${s.id}</td>
+      <td style="font-weight:600">${s.name}</td>
+      <td>${s.province}</td>
+      <td>${s.district}</td>
+      <td style="font-family:monospace;font-size:10px">${s.shipmentId}</td>
+      <td style="text-align:center">${s.expectedCartons}</td>
+      <td style="text-align:center;color:${s.deliveredCartons===s.expectedCartons?'#166534':'#854d0e'};font-weight:600">${s.deliveredCartons}</td>
+      <td style="text-align:center;color:${s.missing>0?'#991b1b':'#94a3b8'}">${s.missing||'—'}</td>
+      <td style="text-align:center;color:${s.damaged>0?'#854d0e':'#94a3b8'}">${s.damaged||'—'}</td>
+      <td>${statusPill(s.status)}</td>
+      <td><button class="act-btn" onclick="event.stopPropagation();${btnFn}('${s.id}')">View</button></td>
+    </tr>`).join('');
+}
+
+function openSchoolDetail(id){
+  const school = SCHOOLS.find(s=>s.id===id);
+  if(!school) return;
+  document.getElementById('dp-title').textContent = `Shipment ${school.shipmentId} — ${school.name}`;
+  document.getElementById('dp-subtitle').textContent = `${school.district} · ${school.province} · Confirmed by: ${school.confirmedBy} · ${school.confirmedDate}`;
+  buildDetailPanel(school,'detail-panel','dp-meta','dp-alerts','dp-chain','dp-cartons');
+  document.getElementById('detail-panel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function openSchoolDetail2(id){
+  const school = SCHOOLS.find(s=>s.id===id);
+  if(!school) return;
+  document.getElementById('dp2-title').textContent = `Shipment ${school.shipmentId} — ${school.name}`;
+  buildDetailPanel(school,'detail-panel2','dp2-meta','dp2-alerts','dp2-chain','dp2-cartons');
+}
+
+function closeDetail(){document.getElementById('detail-panel').classList.remove('on');}
+
+function filterSchools(){
+  const prov = document.getElementById('f-province').value;
+  const st = document.getElementById('f-status').value;
+  const q = document.getElementById('f-search').value.toLowerCase();
+  const filtered = SCHOOLS.filter(s=>{
+    return (!prov||s.province===prov)&&(!st||s.status===st)&&(!q||s.name.toLowerCase().includes(q)||s.id.toLowerCase().includes(q));
+  });
+  renderSchoolTable('school-tbody', filtered, 'openSchoolDetail');
+}
+
+function filterSchools2(){
+  const prov = document.getElementById('sf-province').value;
+  const st = document.getElementById('sf-status').value;
+  const filtered = SCHOOLS.filter(s=>(!prov||s.province===prov)&&(!st||s.status===st));
+  renderSchoolTable('school-tbody2', filtered, 'openSchoolDetail2');
+}
+
+function clearFilters(){
+  document.getElementById('f-province').value='';
+  document.getElementById('f-status').value='';
+  document.getElementById('f-search').value='';
+  filterSchools();
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CARTON MODAL
+// ═══════════════════════════════════════════════════════════════════════════
+function openCartonModal(cartonId, schoolId){
+  const school = SCHOOLS.find(s=>s.id===schoolId);
+  const cartons = getCartons(school);
+  const c = cartons.find(x=>x.id===cartonId);
+  if(!c) return;
+  const m = MATERIALS[c.material];
+
+  // Status label and colour
+  const stLabel = c.flag==='missing'?'MISSING — Under investigation':c.flag==='damaged'?'DELIVERED — EXCEPTION (damaged)':c.flag==='wrong'?'DELIVERED — EXCEPTION (wrong material)':c.status==='delivered'?'DELIVERED ✓':c.status==='at-district'?'IN TRANSIT — At district office':c.status==='at-province'?'IN TRANSIT — At province hub':'NOT YET DISPATCHED';
+  const stColor = (c.flag==='missing'||c.flag==='damaged'||c.flag==='wrong')?'#991b1b':c.status==='delivered'?'#166534':c.status.startsWith('at')?'#1e40af':'#64748b';
+
+  // Build scan history
+  let scans;
+  if(school.province==='Enga'){
+    scans = mkScansEnga(school.name, c.flag==='missing'?'at-province':c.status);
+  } else {
+    scans = mkScans(school.name, school.province, c.flag==='missing'?'missing':c.status, c.flag);
+  }
+
+  const evClass = {packed:'ev-packed',dispatched:'ev-dispatched',received:'ev-received',delivered:'ev-delivered',missing:'ev-missing',damaged:'ev-damaged'};
+  const scanRows = scans.map(sc=>`<tr>
+    <td style="white-space:nowrap;color:#64748b">${sc.dt}</td>
+    <td>${sc.loc}</td>
+    <td><span class="scan-event ${evClass[sc.ev]||''}">${sc.ev.charAt(0).toUpperCase()+sc.ev.slice(1)}</span></td>
+    <td style="color:#94a3b8;font-size:10px">${sc.off}</td>
+  </tr>`).join('');
+
+  let flagHtml = '';
+  if(c.flag==='missing') flagHtml=`<div class="flag-box"><strong>&#9888; Missing — investigation required</strong>Last scanned at Mt Hagen Province Hub on 09 Feb 2026 at 08:00. Carton not recorded at district or school. Province store officer queried — response pending.</div>`;
+  if(c.flag==='damaged') flagHtml=`<div class="flag-box"><strong>&#9888; Delivered with exception — water damage</strong>Damage reported by school head teacher at point of delivery. Contents (${m.name} × ${m.qty}) assessed as unusable. Replacement request submitted to province office.</div>`;
+  if(c.flag==='wrong') flagHtml=`<div class="flag-box" style="background:#fffbeb;border-color:#fde68a;color:#92400e"><strong>&#9888; Wrong material — incorrect packing</strong>Carton labelled as SR-G1 (Grade 1 Student Reader) but found to contain SR-G2 (Grade 2 Student Reader) on school inspection. Replacement of correct materials requested from Central Warehouse.</div>`;
+
+  // Chain visualisation
+  const chainSteps=['Warehouse','Province hub','District office','School'];
+  let chainH='<div class="chain-vis" style="margin:10px 0">';
+  chainSteps.forEach((s,i)=>{
+    const done = scans.length > [1,3,5,6][i];
+    const curr = !done && scans.length > [0,2,4,5][i];
+    const cls = done?'cv-done':curr?'cv-curr':'cv-pend';
+    const col = done?'#166534':curr?'#854d0e':'#94a3b8';
+    chainH+=`<div class="cv-step"><div class="cv-dot ${cls}"></div><span class="cv-label" style="font-size:9px;color:${col};font-weight:${done||curr?'600':'400'}">${s}</span></div>`;
+    if(i<chainSteps.length-1) chainH+=`<span class="cv-arr">→</span>`;
+  });
+  chainH+='</div>';
+
+  document.getElementById('modal-title').textContent = 'Carton: '+cartonId;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+      <div style="font-size:13px;font-weight:700;color:${stColor}">${stLabel}</div>
+      <div style="font-size:10px;font-family:monospace;color:#94a3b8">${cartonId}</div>
+    </div>
+    ${chainH}
+    <div class="carton-info">
+      <div class="ci-box"><label>Material</label><value>${m.name}</value></div>
+      <div class="ci-box"><label>Grade / Level</label><value>${m.grade}</value></div>
+      <div class="ci-box"><label>Category</label><value>${m.cat}</value></div>
+      <div class="ci-box"><label>Qty in carton</label><value>${m.qty} copies</value></div>
+      <div class="ci-box"><label>Origin</label><value>Central Warehouse — Port Moresby</value></div>
+      <div class="ci-box"><label>Intended destination</label><value>${school.name}</value></div>
+      <div class="ci-box"><label>Shipment</label><value style="font-family:monospace">${school.shipmentId}</value></div>
+      <div class="ci-box"><label>Dispatch date</label><value>07 Feb 2026</value></div>
+    </div>
+    ${flagHtml}
+    <div style="font-size:11px;font-weight:700;color:#1F3864;margin-bottom:6px;margin-top:8px">Complete scan history — chain of custody</div>
+    <table class="scan-tbl">
+      <thead><tr><th>Date / Time</th><th>Location</th><th>Event</th><th>Officer / Signatory</th></tr></thead>
+      <tbody>${scanRows}</tbody>
+    </table>
+    ${c.flag==='missing'?'<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 11px;margin-top:8px;font-size:10px;color:#991b1b"><strong>No further scans recorded after dispatch from province hub.</strong> Expected at Jiwaka District Education Office on 09 Feb — no scan recorded. Status: OVERDUE / MISSING.</div>':''}
+  `;
+  document.getElementById('modal').classList.add('on');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CARTON LOOKUP TAB
+// ═══════════════════════════════════════════════════════════════════════════
+const SAMPLE_CARTONS = [
+  {id:'PNG-LEAP-2026-00001', desc:'Delivered — Banz Primary'},
+  {id:'PNG-LEAP-2026-00116', desc:'Damaged — Mt Hagen Primary'},
+  {id:'PNG-LEAP-2026-00214', desc:'Missing — Minj Primary'},
+  {id:'PNG-LEAP-2026-00507', desc:'In transit — at district'},
+  {id:'PNG-LEAP-2026-00605', desc:'In transit — at province hub'},
+  {id:'PNG-LEAP-2026-00814', desc:'Wrong material — Bumayong'},
+  {id:'PNG-LEAP-2026-00901', desc:'Not dispatched — Nawaeb'},
+];
+
+document.getElementById('sample-btns').innerHTML = SAMPLE_CARTONS.map(s=>
+  `<button class="sample-btn" onclick="document.getElementById('carton-search').value='${s.id}';lookupCarton()" title="${s.desc}">${s.id}</button>`
+).join('');
+
+function lookupCarton(){
+  const query = document.getElementById('carton-search').value.trim().toUpperCase();
+  let found = null, foundSchool = null;
+  for(const school of SCHOOLS){
+    const cartons = getCartons(school);
+    const c = cartons.find(x=>x.id===query);
+    if(c){found=c;foundSchool=school;break;}
+  }
+  const resEl = document.getElementById('lookup-result');
+  if(!found){
+    resEl.classList.add('on');
+    resEl.innerHTML='<div style="padding:20px;text-align:center;color:#991b1b;font-size:12px">&#9888; Carton ID not found. Check the format: PNG-LEAP-2026-XXXXX</div>';
+    return;
+  }
+  const m = MATERIALS[found.material];
+  const stLabel = found.flag==='missing'?'MISSING':found.flag==='damaged'?'EXCEPTION — Damaged':found.flag==='wrong'?'EXCEPTION — Wrong material':found.status==='delivered'?'DELIVERED':found.status==='at-district'?'IN TRANSIT — At district':found.status==='at-province'?'IN TRANSIT — At province hub':'NOT DISPATCHED';
+  const stColor = (found.flag==='missing'||found.flag==='damaged'||found.flag==='wrong')?'#991b1b':found.status==='delivered'?'#166534':found.status.startsWith('at')?'#1e40af':'#64748b';
+  const stBg = (found.flag==='missing'||found.flag==='damaged'||found.flag==='wrong')?'#fef2f2':found.status==='delivered'?'#dcfce7':found.status.startsWith('at')?'#dbeafe':'#f1f5f9';
+
+  let scans;
+  if(foundSchool.province==='Enga'){
+    scans = mkScansEnga(foundSchool.name, found.flag==='missing'?'at-province':found.status);
+  } else {
+    scans = mkScans(foundSchool.name, foundSchool.province, found.flag==='missing'?'missing':found.status, found.flag);
+  }
+  const evClass = {packed:'ev-packed',dispatched:'ev-dispatched',received:'ev-received',delivered:'ev-delivered',missing:'ev-missing',damaged:'ev-damaged'};
+  const scanRows = scans.map(sc=>`<tr>
+    <td style="white-space:nowrap;color:#64748b">${sc.dt}</td>
+    <td>${sc.loc}</td>
+    <td><span class="scan-event ${evClass[sc.ev]||''}">${sc.ev.charAt(0).toUpperCase()+sc.ev.slice(1)}</span></td>
+    <td style="color:#94a3b8;font-size:10px">${sc.off}</td>
+  </tr>`).join('');
+
+  resEl.classList.add('on');
+  resEl.innerHTML=`
+    <div class="lr-hdr" style="background:${stBg};border-bottom:1px solid #e2e8f0">
+      <div>
+        <div class="lr-id">${found.id}</div>
+        <div style="font-size:10px;color:#64748b;margin-top:2px">${m.name} · ${m.qty} copies · Dest: ${foundSchool.name}</div>
+      </div>
+      <span style="font-size:11px;font-weight:700;color:${stColor}">${stLabel}</span>
+    </div>
+    <div style="padding:14px">
+      <div class="carton-info" style="margin-bottom:10px">
+        <div class="ci-box"><label>Material</label><value>${m.name}</value></div>
+        <div class="ci-box"><label>Grade</label><value>${m.grade}</value></div>
+        <div class="ci-box"><label>Origin</label><value>Central Warehouse — POM</value></div>
+        <div class="ci-box"><label>Destination</label><value>${foundSchool.name}</value></div>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:#1F3864;margin-bottom:7px">Chain of custody — full scan history</div>
+      <table class="scan-tbl"><thead><tr><th>Date / Time</th><th>Location</th><th>Event</th><th>Officer</th></tr></thead>
+      <tbody>${scanRows}</tbody></table>
+      ${found.flag==='missing'?'<div class="flag-box" style="margin-top:8px"><strong>&#9888; No scan at destination — carton missing</strong>Expected at Jiwaka District Education Office 09 Feb 2026. No scan recorded. Under investigation.</div>':''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// SCHOOL RECEIVING TAB
+// ═══════════════════════════════════════════════════════════════════════════
+const recvSel = document.getElementById('recv-school-sel');
+SCHOOLS.filter(s=>s.status!=='pending').forEach(s=>{
+  const opt = document.createElement('option');
+  opt.value=s.id; opt.textContent=`${s.name} (${s.province})`;
+  recvSel.appendChild(opt);
+});
+
+function loadSchoolRecv(){
+  const id = recvSel.value;
+  if(!id){document.getElementById('recv-card-wrap').style.display='none';return;}
+  const school = SCHOOLS.find(s=>s.id===id);
+  document.getElementById('recv-card-wrap').style.display='block';
+  document.getElementById('rv-school-name').textContent = school.name;
+  document.getElementById('rv-delivery-id').textContent = `Delivery ID: DEL-PNG-2026-${school.cartonStart}`;
+  document.getElementById('rv-expected-count').textContent = school.expectedCartons+' cartons';
+  const tbody = document.getElementById('rv-tbody');
+  let total = 0;
+  tbody.innerHTML = Object.entries(school.materials).map(([k,v])=>{
+    const m=MATERIALS[k]; total+=v;
+    return `<tr><td>${m.name}</td><td>${m.grade}</td><td>${m.cat}</td><td style="text-align:center;font-weight:600">${v}</td><td style="text-align:center;color:#64748b">${m.qty}</td></tr>`;
+  }).join('');
+  tbody.innerHTML+=`<tr class="total"><td colspan="3">Total</td><td style="text-align:center">${total}</td><td></td></tr>`;
+  document.getElementById('rv-status-section').style.display='block';
+  document.getElementById('conf-screen').classList.remove('on');
+  document.getElementById('exc-form').classList.remove('on');
+}
+
+function confirmDelivery(){
+  const id = recvSel.value;
+  const school = SCHOOLS.find(s=>s.id===id);
+  document.getElementById('rv-status-section').style.display='none';
+  const sc = document.getElementById('conf-screen');
+  sc.classList.add('on');
+  document.getElementById('conf-icon').textContent='✅';
+  document.getElementById('conf-title').textContent='Delivery confirmed — full delivery';
+  document.getElementById('conf-sub').textContent=`${school.expectedCartons} cartons confirmed received · ${new Date().toLocaleString()}`;
+  document.getElementById('conf-detail').innerHTML=`<strong>Confirmation recorded:</strong><br>School: ${school.name}<br>Delivery ID: DEL-PNG-2026-${school.cartonStart}<br>Cartons expected: ${school.expectedCartons}<br>Cartons confirmed received: ${school.expectedCartons}<br>Missing: 0 · Damaged: 0<br>Status: <strong>DELIVERY CONFIRMED</strong><br><br>This confirmation has been sent to the central TLM administrator dashboard.`;
+}
+
+function toggleException(){document.getElementById('exc-form').classList.toggle('on');}
+
+function submitException(){
+  const id = recvSel.value;
+  const school = SCHOOLS.find(s=>s.id===id);
+  const missing = document.getElementById('exc-missing').checked;
+  const damaged = document.getElementById('exc-damaged').checked;
+  const wrong = document.getElementById('exc-wrong').checked;
+  const other = document.getElementById('exc-other').checked;
+  const detail = document.getElementById('exc-detail').value;
+  const types = [missing&&'Missing cartons',damaged&&'Damaged cartons',wrong&&'Wrong materials',other&&'Other'].filter(Boolean).join(', ');
+  document.getElementById('rv-status-section').style.display='none';
+  const sc = document.getElementById('conf-screen');
+  sc.classList.add('on');
+  document.getElementById('conf-icon').textContent='⚠️';
+  document.getElementById('conf-title').style.color='#854d0e';
+  document.getElementById('conf-title').textContent='Exception report submitted';
+  document.getElementById('conf-sub').textContent=`Exception logged · ${new Date().toLocaleString()} · Awaiting administrator review`;
+  document.getElementById('conf-detail').style.background='#fffbeb';
+  document.getElementById('conf-detail').style.color='#78350f';
+  document.getElementById('conf-detail').innerHTML=`<strong>Exception recorded:</strong><br>School: ${school.name}<br>Delivery ID: DEL-PNG-2026-${school.cartonStart}<br>Exception type(s): ${types||'Not specified'}<br>Detail: ${detail||'No additional detail'}<br>Status: <strong>EXCEPTION — FOLLOW-UP REQUIRED</strong><br><br>This exception has been flagged on the central TLM administrator dashboard. The district education officer will be notified within 24 hours.`;
+}
+
+function resetRecv(){
+  recvSel.value='';
+  document.getElementById('recv-card-wrap').style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════════════════════════════════════
+document.querySelector('.inner-nav').addEventListener('click',function(e){
+  const tab=e.target.closest('.itab');if(!tab)return;
+  document.querySelectorAll('.itab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  document.querySelectorAll('.ipg').forEach(p=>p.classList.remove('on'));
+  document.getElementById('ipg-'+tab.dataset.itab).classList.add('on');
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════════════
+renderSchoolTable('school-tbody', SCHOOLS, 'openSchoolDetail');
+renderSchoolTable('school-tbody2', SCHOOLS, 'openSchoolDetail2');
+
+
+const DISPATCH_SHIPMENTS = {
+  'SH-PNG-2026-0041': {school:'Banz Primary School', count:18,
+    cartons:Array.from({length:18},(_,i)=>'PNG-LEAP-2026-'+String(i+1).padStart(5,'0'))},
+  'SH-PNG-2026-0052': {school:'Laiagam Community School', count:12,
+    cartons:Array.from({length:12},(_,i)=>'PNG-LEAP-2026-'+String(i+501).padStart(5,'0'))},
+  'SH-PNG-2026-0061': {school:'Lae Secondary School', count:28,
+    cartons:Array.from({length:28},(_,i)=>'PNG-LEAP-2026-'+String(i+701).padStart(5,'0'))},
+};
+let scannedCartons=new Set(),currentShipment=null;
+function loadDispatch(){
+  const id=document.getElementById('disp-shipment').value;
+  if(!id){document.getElementById('disp-carton-list').style.display='none';return;}
+  currentShipment=DISPATCH_SHIPMENTS[id];scannedCartons=new Set();
+  document.getElementById('disp-done').style.display='none';
+  document.getElementById('disp-carton-list').style.display='block';
+  renderDispatchList();
+}
+function renderDispatchList(){
+  const sh=currentShipment;
+  document.getElementById('disp-list').innerHTML=sh.cartons.map(c=>{
+    const done=scannedCartons.has(c);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:10px;background:'+(done?'#f0fdf4':'#fff')+'"><span style="font-family:monospace;color:'+(done?'#166534':'#475569')+'">'+c+'</span><span style="color:'+(done?'#166534':'#94a3b8')+';font-weight:600">'+(done?'&#10003; Scanned':'—')+'</span></div>';
+  }).join('');
+  document.getElementById('disp-counter').textContent=scannedCartons.size+' of '+sh.cartons.length+' cartons scanned';
+  document.getElementById('disp-confirm-btn').style.display=scannedCartons.size===sh.cartons.length?'block':'none';
+}
+function scanDispatch(){
+  const input=document.getElementById('disp-scan-input');
+  const id=input.value.trim().toUpperCase();
+  if(!id||!currentShipment)return;
+  if(currentShipment.cartons.includes(id)){
+    scannedCartons.add(id);input.value='';
+    input.style.borderColor='#16a34a';setTimeout(()=>input.style.borderColor='#cbd5e1',800);
+    renderDispatchList();
+  } else {
+    input.style.borderColor='#dc2626';setTimeout(()=>input.style.borderColor='#cbd5e1',1200);
+  }
+}
+function confirmDispatch(){
+  const loc=document.getElementById('disp-location').value;
+  const sh=currentShipment;
+  const now=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('disp-carton-list').style.display='none';
+  document.getElementById('disp-done-detail').innerHTML=sh.cartons.length+' cartons dispatched from <strong>'+loc+'</strong><br>Destination: '+sh.school+'<br>Scan recorded: '+now;
+  document.getElementById('disp-done').style.display='block';
+}
+const recvLog=[];
+function scanReceive(){
+  const input=document.getElementById('recv-scan-input');
+  const id=input.value.trim().toUpperCase();
+  const loc=document.getElementById('recv-loc').value;
+  if(!id)return;
+  const resultEl=document.getElementById('recv-result');
+  let found=null,foundSchool=null;
+  for(const s of SCHOOLS){const cartons=getCartons(s);const c=cartons.find(x=>x.id===id);if(c){found=c;foundSchool=s;break;}}
+  resultEl.style.display='block';
+  const now=new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  if(!found){
+    resultEl.style.cssText='background:#fef2f2;border:1px solid #fecaca;color:#991b1b;border-radius:6px;padding:10px 12px;font-size:11px;margin-bottom:10px';
+    resultEl.innerHTML='<strong>&#9888; Carton not found</strong><br>ID '+id+' is not in the system. Check the barcode and try again.';
+    input.value='';return;
+  }
+  const m=MATERIALS[found.material];
+  resultEl.style.cssText='background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;border-radius:6px;padding:10px 12px;font-size:11px;margin-bottom:10px';
+  resultEl.innerHTML='<strong>&#10003; Carton received — '+id+'</strong><br>Contents: '+m.name+' × '+m.qty+'<br>Destination: '+foundSchool.name+' ('+foundSchool.province+')<br>Received at: '+loc+' · '+now;
+  recvLog.unshift({id,time:now,material:m.name,dest:foundSchool.name});
+  document.getElementById('recv-log').innerHTML=recvLog.slice(0,8).map(r=>'<div style="display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-bottom:1px solid #f1f5f9;font-size:10px"><span style="font-family:monospace;color:#1e40af">'+r.id+'</span><span style="color:#475569">'+r.material+'</span><span style="color:#64748b">'+r.dest+'</span><span style="background:#dcfce7;color:#166534;padding:1px 6px;border-radius:10px;font-size:9px;font-weight:600">Received '+r.time+'</span></div>').join('');
+  input.value='';input.style.borderColor='#16a34a';setTimeout(()=>input.style.borderColor='#cbd5e1',800);
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){
+    if(document.activeElement.id==='disp-scan-input')scanDispatch();
+    if(document.activeElement.id==='recv-scan-input')scanReceive();
+    if(document.activeElement.id==='carton-search')lookupCarton();
+  }
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LEAP PNG MIS Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min-height:100vh}
+.wrap{max-width:1160px;margin:0 auto}
+.hdr{background:#1F3864;border-radius:10px 10px 0 0;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.hdr h1{color:#fff;font-size:14px;font-weight:700}
+.hdr p{color:#90afd4;font-size:10px;margin-top:2px}
+.hdr-r{display:flex;gap:6px}
+.bdg{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600}
+.bb{background:#1e40af;color:#bfdbfe}.bg{background:#166534;color:#bbf7d0}.ba{background:#854d0e;color:#fef3c7}
+.nav{background:#142a4f;display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,0.08);overflow-x:auto}
+.ntab{padding:9px 15px;color:#90afd4;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;user-select:none;transition:all 0.15s}
+.ntab:hover{color:#fff;background:rgba(255,255,255,0.05)}
+.ntab.on{color:#fff;border-bottom-color:#4da6ff}
+.src-bar{background:#0f1f3d;padding:5px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.src-item{display:flex;align-items:center;gap:4px;font-size:9px;color:#90afd4}
+.src-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.body{background:#fff;border-radius:0 0 10px 10px;padding:16px}
+.pg{display:none}.pg.on{display:block}
+
+/* KPI CARDS */
+.kg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-bottom:13px}
+.kg3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:13px}
+.kc{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 13px;position:relative;overflow:hidden}
+.kc::before{content:"";position:absolute;top:0;left:0;right:0;height:3px}
+.cb::before{background:#2E75B6}.cg::before{background:#16a34a}.ca::before{background:#d97706}.cp::before{background:#7c3aed}.cpk::before{background:#db2777}.cr::before{background:#dc2626}
+.kl{font-size:10px;color:#64748b;line-height:1.3;margin-bottom:3px}
+.kv{font-size:21px;font-weight:700;color:#1F3864;line-height:1}
+.ks{font-size:9px;color:#94a3b8;margin-top:2px}
+.kt{margin-top:6px;background:#f1f5f9;border-radius:3px;height:4px}
+.kf{height:4px;border-radius:3px}
+.kprow{display:flex;justify-content:space-between;font-size:9px;color:#94a3b8;margin-top:2px}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:12px;margin-bottom:13px}
+.g2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:13px}
+.g2r{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:12px;margin-bottom:13px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:13px}
+
+/* CARDS */
+.cc{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px}
+.ct{font-size:11px;font-weight:700;color:#1F3864;margin-bottom:9px}
+.sec{font-size:12px;font-weight:700;color:#1F3864;margin-bottom:9px;margin-top:4px}
+
+/* HOT TOPIC TREATMENT */
+.hot-section{background:#fffbeb;border:2px solid #fbbf24;border-radius:10px;padding:13px;margin-bottom:13px}
+.hot-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:6px}
+.hot-title{font-size:13px;font-weight:700;color:#78350f}
+.hot-badge{display:inline-flex;align-items:center;gap:4px;background:#f59e0b;color:#fff;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700}
+.hot-src{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
+.hot-src-bt{background:#dbeafe;color:#1e40af}
+.hot-src-kb{background:#dcfce7;color:#166534}
+
+/* MAP */
+.map-wrap{border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;background:#c8e6f5;min-height:280px;position:relative}
+.map-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#94a3b8;font-size:12px;background:#c8e6f5;border-radius:8px;z-index:2}
+.spin{width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:#2E75B6;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LEGEND */
+.leg{display:flex;flex-wrap:wrap;gap:10px;margin-top:7px}
+.li{display:flex;align-items:center;gap:5px;font-size:10px;color:#475569}
+.ld{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+
+/* STATUS TABLE */
+.stbl{width:100%;border-collapse:collapse;font-size:11px}
+.stbl th{background:#f8fafc;color:#475569;padding:6px 9px;text-align:left;font-size:9px;font-weight:700;border-bottom:2px solid #e2e8f0}
+.stbl td{padding:5px 9px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle}
+.stbl tr:hover td{background:#f8fafc}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
+.p-c{background:#dcfce7;color:#166534}
+.p-i{background:#fef9c3;color:#854d0e}
+.p-n{background:#fee2e2;color:#991b1b}
+
+/* RF TABLE */
+.rft{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:auto;max-height:320px;margin-bottom:13px}
+.rft table{width:100%;border-collapse:collapse;font-size:10px;min-width:620px}
+.rft th{background:#1F3864;color:#fff;padding:6px 8px;text-align:left;font-size:9px;font-weight:600;position:sticky;top:0;z-index:2}
+.rft td{padding:5px 8px;border-bottom:1px solid #f1f5f9;color:#1e293b;vertical-align:middle}
+.rft tr:hover td{background:#f8fafc}
+.pdb{background:#dbeafe;color:#1e40af;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700}
+.ib{background:#e0e7ff;color:#3730a3;padding:1px 5px;border-radius:3px;font-size:9px}
+.ht-row td{background:#fffbeb!important;font-weight:500}
+
+/* DISBURSEMENT TABLE */
+.dtb{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:13px}
+.dtb table{width:100%;border-collapse:collapse;font-size:11px}
+.dtb th{background:#374151;color:#fff;padding:7px 10px;text-align:left;font-size:10px;font-weight:600}
+.dtb td{padding:6px 10px;border-bottom:1px solid #f1f5f9;color:#1e293b}
+.dtb .tot td{background:#f8fafc;font-weight:700}
+
+/* HOT TOPIC OVERVIEW CARDS */
+.ht-overview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:13px}
+.ht-ov-card{border:2px solid #fbbf24;border-radius:10px;padding:11px;background:#fffbeb}
+.ht-ov-title{font-size:11px;font-weight:700;color:#78350f;margin-bottom:4px}
+.ht-ov-src{font-size:9px;color:#92400e;margin-bottom:8px}
+.ht-stack{display:flex;height:10px;border-radius:5px;overflow:hidden;gap:1px;margin-bottom:6px}
+.ht-prov-pills{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.ht-pp{font-size:8px;padding:1px 5px;border-radius:10px;font-weight:600}
+.ht-pp-c{background:#dcfce7;color:#166534}
+.ht-pp-i{background:#fef9c3;color:#854d0e}
+.ht-pp-n{background:#fee2e2;color:#991b1b}
+
+@media(max-width:760px){.kg{grid-template-columns:1fr 1fr}.g2,.g2e,.g2r{grid-template-columns:1fr}.g3{grid-template-columns:1fr}.ht-overview{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hdr">
+  <div><h1>LEAP PNG — Management Information System</h1><p>P505529 · Learning Enhancement and Access Program · Phase 1: 2025–2031 · $150M IDA · 8 Target Provinces</p></div>
+  <div class="hdr-r"><span class="bdg bb">Phase 1 active</span><span class="bdg bg">Data live</span><span class="bdg ba">Q1 2026</span></div>
+</div>
+<div class="nav">
+  <div class="ntab on" data-tab="overview">Portfolio overview</div>
+  <div class="ntab" data-tab="ece">C1 — ECE</div>
+  <div class="ntab" data-tab="teacher">C2 — Teachers &amp; TLM</div>
+  <div class="ntab" data-tab="infra">C3 — Infrastructure &amp; ICT</div>
+  <div class="ntab" data-tab="me">C4 — M&amp;E</div>
+  <div class="ntab" data-tab="disb">Disbursements</div>
+</div>
+<div class="src-bar">
+  <div class="src-item"><div class="src-dot" style="background:#60a5fa"></div>TLM: Bluetree Track &amp; Trace</div>
+  <div class="src-item"><div class="src-dot" style="background:#34d399"></div>Infrastructure + ICT: KoboToolbox (image uploads)</div>
+  <div class="src-item"><div class="src-dot" style="background:#a78bfa"></div>ECE + Teacher: KoboToolbox</div>
+  <div class="src-item"><div class="src-dot" style="background:#f59e0b"></div>Finance: PMU financial system</div>
+  <div class="src-item" style="margin-left:auto"><div class="src-dot" style="background:#94a3b8"></div>Last sync: 31 Mar 2026 · 18:42 UTC</div>
+</div>
+<div class="body">
+
+<!-- ===== PORTFOLIO OVERVIEW ===== -->
+<div class="pg on" id="pg-overview">
+  <div class="sec">PDO indicator status — Q1 2026</div>
+  <div class="kg">
+    <div class="kc cb"><div class="kl">PDO 1 — teachers with improved practice</div><div class="kv">31.4%</div><div class="ks">Target: 60% by Oct 2031</div><div class="kt"><div class="kf" style="width:52%;background:#2E75B6"></div></div><div class="kprow"><span>0% baseline</span><span>52% to target</span></div></div>
+    <div class="kc cg"><div class="kl">PDO 2 — schools completing refurbishment</div><div class="kv">163</div><div class="ks">Target: 3,500 schools</div><div class="kt"><div class="kf" style="width:5%;background:#16a34a"></div></div><div class="kprow"><span>0 baseline</span><span>5% of target</span></div></div>
+    <div class="kc ca"><div class="kl">PDO 3 — grade 2 reading proficiency</div><div class="kv">66.8%</div><div class="ks">Target: 75% · Baseline: 65%</div><div class="kt"><div class="kf" style="width:18%;background:#d97706"></div></div><div class="kprow"><span>65% baseline</span><span>18% to target</span></div></div>
+    <div class="kc cp"><div class="kl">PDO 4 — grade 2 math proficiency</div><div class="kv">78.2%</div><div class="ks">Target: 87% · Baseline: 77%</div><div class="kt"><div class="kf" style="width:12%;background:#7c3aed"></div></div><div class="kprow"><span>77% baseline</span><span>12% to target</span></div></div>
+  </div>
+
+  <div class="sec" style="color:#78350f;display:flex;align-items:center;gap:8px">
+    <span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700">Management priority</span>
+    Hot topics requiring Q2 2026 attention
+  </div>
+  <div class="ht-overview" id="ht-overview-cards"></div>
+
+  <div class="sec">Results framework — all indicators</div>
+  <div class="rft"><table><thead><tr><th>Indicator</th><th>Level</th><th>Baseline</th><th>Q3 2025</th><th>Q4 2025</th><th>Q1 2026</th><th>Target</th><th>Progress</th><th>Status</th></tr></thead><tbody id="rf-body"></tbody></table></div>
+
+  <div class="g2e">
+    <div class="cc"><div class="ct">PDO indicator quarterly trend</div><div style="position:relative;height:170px"><canvas id="c-trend" role="img" aria-label="PDO trend">PDO trend.</canvas></div></div>
+    <div class="cc"><div class="ct">Component status distribution — Q1 2026</div><div style="position:relative;height:170px"><canvas id="c-donut" role="img" aria-label="Status distribution">Status.</canvas></div></div>
+  </div>
+</div>
+
+<!-- ===== C1 ECE ===== -->
+<div class="pg" id="pg-ece">
+  <div class="kg">
+    <div class="kc cp"><div class="kl">ECE centres with sub-grants</div><div class="kv">38</div><div class="ks">Target: 150 centres</div><div class="kt"><div class="kf" style="width:25%;background:#7c3aed"></div></div><div class="kprow"><span>25% of target</span><span>112 remaining</span></div></div>
+    <div class="kc cp"><div class="kl">Children enrolled in ECE pilots</div><div class="kv">912</div><div class="ks">Target: 4,500 children</div><div class="kt"><div class="kf" style="width:20%;background:#7c3aed"></div></div><div class="kprow"><span>20% of target</span></div></div>
+    <div class="kc cp"><div class="kl">Centres meeting all 6 MOS standards</div><div class="kv">61%</div><div class="ks">Target: 80%</div><div class="kt"><div class="kf" style="width:76%;background:#7c3aed"></div></div><div class="kprow"><span>76% to target</span></div></div>
+    <div class="kc cp"><div class="kl">Gender parity — girls enrolled</div><div class="kv">49%</div><div class="ks">Target: 50% parity</div><div class="kt"><div class="kf" style="width:98%;background:#7c3aed"></div></div><div class="kprow"><span>Near target</span></div></div>
+  </div>
+  <div class="g2">
+    <div class="cc">
+      <div class="ct">ECE centre locations — 8 target provinces</div>
+      <div class="map-wrap" id="mw-ece"><div class="map-loading" id="ml-ece"><div class="spin"></div>Loading PNG map…</div><svg id="ms-ece" style="display:none;width:100%;height:280px"></svg></div>
+      <div class="leg" style="margin-top:7px">
+        <div class="li"><div class="ld" style="background:#7c3aed"></div>Sub-grant + MOS met</div>
+        <div class="li"><div class="ld" style="background:#a78bfa"></div>Sub-grant, partial MOS</div>
+        <div class="li"><div class="ld" style="background:#dc2626"></div>No sub-grant yet</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div class="cc"><div class="ct">Centres by province</div><div style="position:relative;height:135px"><canvas id="c-ece-bar" role="img" aria-label="ECE by province">ECE.</canvas></div></div>
+      <div class="cc"><div class="ct">MOS compliance breakdown</div><div style="position:relative;height:130px"><canvas id="c-mos" role="img" aria-label="MOS compliance">MOS.</canvas></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== C2 TEACHERS + TLM ===== -->
+<div class="pg" id="pg-teacher">
+  <div class="kg">
+    <div class="kc cg"><div class="kl">Teachers trained — structured pedagogy</div><div class="kv">2,870</div><div class="ks">Target: 9,000</div><div class="kt"><div class="kf" style="width:32%;background:#16a34a"></div></div><div class="kprow"><span>32% of target</span></div></div>
+    <div class="kc cg"><div class="kl">% female teachers trained</div><div class="kv">41%</div><div class="ks">Target: 45% · Baseline: 39%</div><div class="kt"><div class="kf" style="width:67%;background:#16a34a"></div></div><div class="kprow"><span>67% to target</span></div></div>
+    <div class="kc cg"><div class="kl">CE — training met professional needs</div><div class="kv">79%</div><div class="ks">Target: 80% — near target</div><div class="kt"><div class="kf" style="width:99%;background:#16a34a"></div></div><div class="kprow"><span>Almost at target</span></div></div>
+    <div class="kc cg"><div class="kl">Teachers completing diploma upgrading</div><div class="kv">24</div><div class="ks">Enrolled: 210 · Target: 480</div><div class="kt"><div class="kf" style="width:5%;background:#16a34a"></div></div><div class="kprow"><span>5% complete</span></div></div>
+  </div>
+  <div class="g2e">
+    <div class="cc"><div class="ct">Cumulative teachers trained by quarter</div><div style="position:relative;height:165px"><canvas id="c-ttrend" role="img" aria-label="Training trend">Training.</canvas></div></div>
+    <div class="cc"><div class="ct">Pre vs post observation score by province</div><div style="position:relative;height:165px"><canvas id="c-obs" role="img" aria-label="Observation scores">Scores.</canvas></div></div>
+  </div>
+
+  <div class="hot-section">
+    <div class="hot-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span class="hot-badge">&#9733; Management priority</span>
+          <span class="hot-src hot-src-bt">Bluetree Track &amp; Trace System</span>
+        </div>
+        <div class="hot-title">Teaching &amp; Learning Materials — Distribution Status Across 8 Provinces</div>
+        <div style="font-size:10px;color:#92400e;margin-top:2px">School receipt confirmation tracked via Bluetree QR scan at point of delivery · Updates dashboard in real time</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700;color:#166534">487 <span style="font-size:11px;color:#475569">/ 743 schools confirmed</span></div>
+        <div style="font-size:10px;color:#854d0e;margin-top:2px">256 schools pending receipt confirmation</div>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="ct" style="color:#78350f">Province-level delivery status — Papua New Guinea</div>
+        <div class="map-wrap" id="mw-tlm"><div class="map-loading" id="ml-tlm"><div class="spin"></div>Loading PNG map…</div><svg id="ms-tlm" style="display:none;width:100%;height:280px"></svg></div>
+        <div class="leg" style="margin-top:7px">
+          <div class="li"><div class="ld" style="background:#16a34a"></div>Complete — all schools confirmed</div>
+          <div class="li"><div class="ld" style="background:#d97706"></div>In progress — delivery ongoing</div>
+          <div class="li"><div class="ld" style="background:#dc2626"></div>Not started</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div class="cc"><div class="ct">Schools confirmed receipt by province</div><div style="position:relative;height:175px"><canvas id="c-tlm-bar" role="img" aria-label="TLM by province">TLM.</canvas></div></div>
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden">
+          <table class="stbl" id="tbl-tlm-mini"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== C3 INFRASTRUCTURE + ICT ===== -->
+<div class="pg" id="pg-infra">
+  <div class="kg">
+    <div class="kc cg"><div class="kl">Schools — refurbishment complete (PDO 2)</div><div class="kv">163</div><div class="ks">Target: 3,500 · Grants issued: 245</div><div class="kt"><div class="kf" style="width:5%;background:#16a34a"></div></div><div class="kprow"><span>5% of total target</span><span>67% of grants issued</span></div></div>
+    <div class="kc ca"><div class="kl">Schools — construction in progress</div><div class="kv">68</div><div class="ks">Works ongoing · KoboToolbox verified</div><div class="kt"><div class="kf" style="width:28%;background:#d97706"></div></div><div class="kprow"><span>28% of grants issued</span></div></div>
+    <div class="kc cr"><div class="kl">Grant issued — works not yet started</div><div class="kv">14</div><div class="ks">Flagged for PDoE follow-up</div><div class="kt"><div class="kf" style="width:6%;background:#dc2626"></div></div><div class="kprow"><span>Action required</span></div></div>
+    <div class="kc cb"><div class="kl">Annual census submission rate</div><div class="kv">71%</div><div class="ks">Target: 95% · Baseline: 42%</div><div class="kt"><div class="kf" style="width:55%;background:#2E75B6"></div></div><div class="kprow"><span>42% baseline</span><span>55% to target</span></div></div>
+  </div>
+
+  <div class="hot-section">
+    <div class="hot-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span class="hot-badge">&#9733; Management priority</span>
+          <span class="hot-src hot-src-kb">KoboToolbox + photo evidence</span>
+        </div>
+        <div class="hot-title">School Infrastructure Grants — Disbursement &amp; Construction Status</div>
+        <div style="font-size:10px;color:#92400e;margin-top:2px">Field officers submit construction inspection forms with GPS-stamped photos from site · Checklist covers: classroom, roof, latrine, WaSH, accessibility, solar</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700;color:#166534">163 <span style="font-size:11px;color:#475569">complete</span> &nbsp; <span style="color:#d97706">68</span> <span style="font-size:11px;color:#475569">in progress</span> &nbsp; <span style="color:#dc2626">14</span> <span style="font-size:11px;color:#475569">stalled</span></div>
+        <div style="font-size:10px;color:#854d0e;margin-top:2px">Total grants issued: 245 of 3,500 target schools</div>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="ct" style="color:#78350f">Construction status by province — Papua New Guinea</div>
+        <div class="map-wrap" id="mw-infra"><div class="map-loading" id="ml-infra"><div class="spin"></div>Loading PNG map…</div><svg id="ms-infra" style="display:none;width:100%;height:280px"></svg></div>
+        <div class="leg" style="margin-top:7px">
+          <div class="li"><div class="ld" style="background:#16a34a"></div>Complete (verified by field officer)</div>
+          <div class="li"><div class="ld" style="background:#d97706"></div>In progress</div>
+          <div class="li"><div class="ld" style="background:#dc2626"></div>Stalled / not started</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div class="cc"><div class="ct">Construction status by province</div><div style="position:relative;height:175px"><canvas id="c-infra-bar" role="img" aria-label="Infrastructure by province">Infra.</canvas></div></div>
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden">
+          <table class="stbl" id="tbl-infra-mini"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hot-section" style="margin-bottom:0">
+    <div class="hot-header">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <span class="hot-badge">&#9733; Management priority</span>
+          <span class="hot-src hot-src-kb">KoboToolbox + photo evidence</span>
+        </div>
+        <div class="hot-title">ICT Hub Refurbishment — Equipment Installation &amp; Connectivity Status</div>
+        <div style="font-size:10px;color:#92400e;margin-top:2px">Field officers submit hub inspection forms — equipment checklist, connectivity test result (Mbps), photo evidence from computer lab</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700;color:#166534">67 <span style="font-size:11px;color:#475569">complete</span> &nbsp; <span style="color:#d97706">45</span> <span style="font-size:11px;color:#475569">in progress</span> &nbsp; <span style="color:#dc2626">88</span> <span style="font-size:11px;color:#475569">not started</span></div>
+        <div style="font-size:10px;color:#854d0e;margin-top:2px">200 hubs planned across 8 provinces · 34% complete</div>
+      </div>
+    </div>
+    <div class="g2">
+      <div>
+        <div class="ct" style="color:#78350f">ICT hub status by province — Papua New Guinea</div>
+        <div class="map-wrap" id="mw-ict"><div class="map-loading" id="ml-ict"><div class="spin"></div>Loading PNG map…</div><svg id="ms-ict" style="display:none;width:100%;height:280px"></svg></div>
+        <div class="leg" style="margin-top:7px">
+          <div class="li"><div class="ld" style="background:#16a34a"></div>Complete — equipment installed, connected</div>
+          <div class="li"><div class="ld" style="background:#d97706"></div>In progress</div>
+          <div class="li"><div class="ld" style="background:#dc2626"></div>Not started</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <div class="cc"><div class="ct">ICT hub status by province</div><div style="position:relative;height:175px"><canvas id="c-ict-bar" role="img" aria-label="ICT by province">ICT.</canvas></div></div>
+        <div style="background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden">
+          <table class="stbl" id="tbl-ict-mini"></table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== C4 M&E ===== -->
+<div class="pg" id="pg-me">
+  <div class="kg">
+    <div class="kc cpk"><div class="kl">Quarterly reports submitted on time</div><div class="kv">3 / 3</div><div class="ks">100% on time this period</div><div class="kt"><div class="kf" style="width:100%;background:#db2777"></div></div></div>
+    <div class="kc cpk"><div class="kl">GRM grievances resolved ≤30 days</div><div class="kv">84%</div><div class="ks">Target: 90% · 18 of 21 resolved</div><div class="kt"><div class="kf" style="width:93%;background:#db2777"></div></div><div class="kprow"><span>Near target</span></div></div>
+    <div class="kc cpk"><div class="kl">Active implementation risks flagged</div><div class="kv">3</div><div class="ks">Procurement · Staffing · Census</div><div class="kt"><div class="kf" style="width:60%;background:#dc2626"></div></div><div class="kprow"><span>2 high · 1 medium</span></div></div>
+    <div class="kc cpk"><div class="kl">KoboToolbox submissions — Q1 2026</div><div class="kv">841</div><div class="ks">Across all 4 forms, 8 provinces</div><div class="kt"><div class="kf" style="width:84%;background:#db2777"></div></div><div class="kprow"><span>84% data quality</span></div></div>
+  </div>
+  <div class="g2e">
+    <div class="cc"><div class="ct">PDO indicators — all quarters</div><div style="position:relative;height:170px"><canvas id="c-pdo" role="img" aria-label="PDO trend">PDO.</canvas></div></div>
+    <div class="cc"><div class="ct">GRM grievances — received vs resolved</div><div style="position:relative;height:170px"><canvas id="c-grm" role="img" aria-label="GRM">GRM.</canvas></div></div>
+  </div>
+  <div class="cc"><div class="ct">Implementation progress by province — Q1 2026</div><div style="position:relative;height:140px"><canvas id="c-prov" role="img" aria-label="Province progress">Province.</canvas></div></div>
+</div>
+
+<!-- ===== DISBURSEMENTS ===== -->
+<div class="pg" id="pg-disb">
+  <div class="kg3">
+    <div class="kc cb"><div class="kl">Total project budget</div><div class="kv">$150M</div><div class="ks">IDA financing · Phase 1</div></div>
+    <div class="kc cb"><div class="kl">Cumulative disbursed FY2026</div><div class="kv">$6.0M</div><div class="ks">4.0% of total budget</div><div class="kt"><div class="kf" style="width:4%;background:#2E75B6"></div></div></div>
+    <div class="kc cb"><div class="kl">FY2026 disbursement rate</div><div class="kv">86%</div><div class="ks">$6.0M actual vs $7.0M planned</div><div class="kt"><div class="kf" style="width:86%;background:#2E75B6"></div></div></div>
+  </div>
+  <div class="g2e">
+    <div class="dtb"><table><thead><tr><th>Component</th><th>Budget</th><th>FY26 plan</th><th>FY26 actual</th><th>% disbursed</th></tr></thead><tbody>
+      <tr><td>C1: ECE</td><td>$5.0M</td><td>$0.8M</td><td>$0.6M</td><td>12%</td></tr>
+      <tr><td>C2: Teacher training + TLM</td><td>$84.0M</td><td>$4.2M</td><td>$3.8M</td><td>4.5%</td></tr>
+      <tr><td>C3: Infrastructure + ICT hubs</td><td>$42.5M</td><td>$1.5M</td><td>$1.2M</td><td>2.8%</td></tr>
+      <tr><td>C4: M&amp;E</td><td>$18.5M</td><td>$0.5M</td><td>$0.4M</td><td>2.2%</td></tr>
+      <tr class="tot"><td>Total</td><td>$150.0M</td><td>$7.0M</td><td>$6.0M</td><td>4.0%</td></tr>
+    </tbody></table></div>
+    <div class="cc"><div class="ct">Planned vs actual disbursements by component (US$M)</div><div style="position:relative;height:210px"><canvas id="c-disb" role="img" aria-label="Disbursements">Disbursements.</canvas></div></div>
+  </div>
+</div>
+
+</div><!-- body -->
+</div><!-- wrap -->
+
+<script>
+const PNAMES=['Western Highlands','Enga','Eastern Highlands','Sandaun','Madang','Morobe','Central','Bougainville'];
+const PSHORT=['W.Highlands','Enga','E.Highlands','Sandaun','Madang','Morobe','Central','Bougainville'];
+
+const DATA = {
+  ece:[
+    {name:'Western Highlands',lat:-5.78,lon:144.27,target:48,complete:35,inprogress:10,notstarted:3},
+    {name:'Enga',lat:-5.38,lon:143.56,target:32,complete:20,inprogress:9,notstarted:3},
+    {name:'Eastern Highlands',lat:-6.38,lon:145.67,target:44,complete:28,inprogress:12,notstarted:4},
+    {name:'Sandaun',lat:-3.78,lon:141.22,target:28,complete:14,inprogress:10,notstarted:4},
+    {name:'Madang',lat:-5.23,lon:145.78,target:36,complete:26,inprogress:8,notstarted:2},
+    {name:'Morobe',lat:-7.02,lon:146.82,target:40,complete:22,inprogress:14,notstarted:4},
+    {name:'Central',lat:-9.12,lon:147.32,target:30,complete:14,inprogress:11,notstarted:5},
+    {name:'Bougainville',lat:-6.22,lon:155.17,target:36,complete:12,inprogress:8,notstarted:16},
+  ],
+  tlm:[
+    {name:'Western Highlands',lat:-5.78,lon:144.27,target:120,complete:120,inprogress:0,notstarted:0},
+    {name:'Enga',lat:-5.38,lon:143.56,target:85,complete:52,inprogress:25,notstarted:8},
+    {name:'Eastern Highlands',lat:-6.38,lon:145.67,target:110,complete:68,inprogress:31,notstarted:11},
+    {name:'Sandaun',lat:-3.78,lon:141.22,target:68,complete:38,inprogress:22,notstarted:8},
+    {name:'Madang',lat:-5.23,lon:145.78,target:92,complete:92,inprogress:0,notstarted:0},
+    {name:'Morobe',lat:-7.02,lon:146.82,target:105,complete:61,inprogress:34,notstarted:10},
+    {name:'Central',lat:-9.12,lon:147.32,target:72,complete:47,inprogress:19,notstarted:6},
+    {name:'Bougainville',lat:-6.22,lon:155.17,target:91,complete:9,inprogress:8,notstarted:74},
+  ],
+  infra:[
+    {name:'Western Highlands',lat:-5.78,lon:144.27,target:45,complete:38,inprogress:6,notstarted:1},
+    {name:'Enga',lat:-5.38,lon:143.56,target:32,complete:18,inprogress:10,notstarted:4},
+    {name:'Eastern Highlands',lat:-6.38,lon:145.67,target:40,complete:24,inprogress:12,notstarted:4},
+    {name:'Sandaun',lat:-3.78,lon:141.22,target:28,complete:14,inprogress:9,notstarted:5},
+    {name:'Madang',lat:-5.23,lon:145.78,target:38,complete:35,inprogress:3,notstarted:0},
+    {name:'Morobe',lat:-7.02,lon:146.82,target:42,complete:22,inprogress:14,notstarted:6},
+    {name:'Central',lat:-9.12,lon:147.32,target:25,complete:4,inprogress:8,notstarted:13},
+    {name:'Bougainville',lat:-6.22,lon:155.17,target:30,complete:8,inprogress:12,notstarted:10},
+  ],
+  ict:[
+    {name:'Western Highlands',lat:-5.78,lon:144.27,target:28,complete:22,inprogress:5,notstarted:1},
+    {name:'Enga',lat:-5.38,lon:143.56,target:18,complete:8,inprogress:7,notstarted:3},
+    {name:'Eastern Highlands',lat:-6.38,lon:145.67,target:24,complete:10,inprogress:9,notstarted:5},
+    {name:'Sandaun',lat:-3.78,lon:141.22,target:16,complete:0,inprogress:0,notstarted:16},
+    {name:'Madang',lat:-5.23,lon:145.78,target:22,complete:14,inprogress:6,notstarted:2},
+    {name:'Morobe',lat:-7.02,lon:146.82,target:26,complete:11,inprogress:9,notstarted:6},
+    {name:'Central',lat:-9.12,lon:147.32,target:20,complete:2,inprogress:5,notstarted:13},
+    {name:'Bougainville',lat:-6.22,lon:155.17,target:24,complete:0,inprogress:4,notstarted:20},
+  ]
+};
+
+function provSt(p){if(p.complete>=p.target*0.9)return'complete';if(p.notstarted>p.complete&&p.notstarted>p.inprogress)return'notstarted';return'inprogress';}
+function stColor(p){return{complete:'#16a34a',inprogress:'#d97706',notstarted:'#dc2626'}[provSt(p)];}
+function stLabel(p){return{complete:'Complete',inprogress:'In Progress',notstarted:'Not Started'}[provSt(p)];}
+function stPill(p){return{complete:'p-c',inprogress:'p-i',notstarted:'p-n'}[provSt(p)];}
+
+const ci={};
+function mkC(id,cfg){if(ci[id])ci[id].destroy();const el=document.getElementById(id);if(el)ci[id]=new Chart(el,cfg);}
+
+function barChart(id,data,indexAxis){
+  const labs=(data||[]).map((_,i)=>PSHORT[i]);
+  mkC(id,{type:'bar',data:{labels:labs,datasets:[
+    {label:'Complete',data:data.map(p=>p.complete),backgroundColor:'#16a34a',stack:'s'},
+    {label:'In Progress',data:data.map(p=>p.inprogress),backgroundColor:'#d97706',stack:'s'},
+    {label:'Not Started',data:data.map(p=>p.notstarted),backgroundColor:'#dc2626',stack:'s'},
+  ]},options:{indexAxis:indexAxis||'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:5}}},scales:{x:{beginAtZero:true,stacked:true,ticks:{font:{size:9}},grid:{color:'#f1f5f9'}},y:{stacked:true,ticks:{font:{size:9}},grid:{display:false}}}}});
+}
+
+function miniTable(id,data,unit){
+  const el=document.getElementById(id);if(!el)return;
+  el.innerHTML='<thead><tr><th>Province</th><th>Complete</th><th>In Progress</th><th>Not Started</th><th>Status</th></tr></thead><tbody id="'+id+'-b"></tbody>';
+  const tb=document.getElementById(id+'-b');
+  data.forEach(p=>{
+    const pct=Math.round(p.complete/p.target*100);
+    tb.innerHTML+=`<tr><td style="font-weight:600">${p.name}</td><td style="color:#166534;font-weight:600;text-align:center">${p.complete}</td><td style="color:#854d0e;text-align:center">${p.inprogress}</td><td style="color:#991b1b;text-align:center">${p.notstarted}</td><td><span class="pill ${stPill(p)}">${stLabel(p)}</span></td></tr>`;
+  });
+}
+
+let topo=null;
+const mapBuilt={};
+
+function buildMap(svgId,loadId,data){
+  const svgEl=document.getElementById(svgId);
+  const loadEl=document.getElementById(loadId);
+  if(!svgEl||!loadEl)return;
+
+  function render(tp){
+    const W=svgEl.parentElement.clientWidth||640;const H=280;
+    svgEl.setAttribute('viewBox','0 0 '+W+' '+H);svgEl.setAttribute('height',H);
+    const proj=d3.geoMercator().center([148,-6.5]).scale(W*2.55).translate([W/2,H/2]);
+    const path=d3.geoPath(proj);
+    const countries=topojson.feature(tp,tp.objects.countries);
+    const pngF=countries.features.find(f=>+f.id===598);
+    const svg=d3.select(svgEl);svg.selectAll('*').remove();
+    svg.append('rect').attr('width',W).attr('height',H).attr('fill','#c8e6f5').attr('rx',8);
+    svg.selectAll('.nb').data(countries.features.filter(f=>+f.id!==598)).join('path').attr('d',path).attr('fill','#dfe8d4').attr('stroke','#bbb').attr('stroke-width',0.5);
+    if(pngF)svg.append('path').datum(pngF).attr('d',path).attr('fill','#dbeafe').attr('stroke','#7ba7bc').attr('stroke-width',1.2);
+    const tip=svg.append('g').style('pointer-events','none');
+    data.forEach((p,i)=>{
+      const [px,py]=proj([p.lon,p.lat]);
+      const col=stColor(p);
+      const r=8+Math.round(p.complete/p.target*9);
+      const g=svg.append('g').style('cursor','pointer');
+      g.append('circle').attr('cx',px).attr('cy',py).attr('r',r+3).attr('fill',col).attr('opacity',0.2);
+      g.append('circle').attr('cx',px).attr('cy',py).attr('r',r).attr('fill',col).attr('stroke','#fff').attr('stroke-width',2);
+      g.append('text').attr('x',px).attr('y',py+4).attr('text-anchor','middle').attr('fill','#fff').style('font-size','9px').style('font-weight','700').text(p.complete);
+      g.on('mouseenter',function(){
+        const pct=Math.round(p.complete/p.target*100);
+        tip.selectAll('*').remove();
+        const tw=170;const tx=Math.min(px+14,W-tw-4);const ty=Math.max(py-74,4);
+        tip.append('rect').attr('x',tx).attr('y',ty).attr('width',tw).attr('height',72).attr('fill','#1F3864').attr('rx',7).attr('opacity',0.97);
+        tip.append('text').attr('x',tx+9).attr('y',ty+16).attr('fill','#fff').style('font-size','11px').style('font-weight','700').text(p.name);
+        tip.append('text').attr('x',tx+9).attr('y',ty+31).attr('fill','#34d399').style('font-size','10px').text('Complete: '+p.complete+' ('+pct+'%)');
+        tip.append('text').attr('x',tx+9).attr('y',ty+45).attr('fill','#fbbf24').style('font-size','10px').text('In progress: '+p.inprogress);
+        tip.append('text').attr('x',tx+9).attr('y',ty+59).attr('fill','#f87171').style('font-size','10px').text('Not started: '+p.notstarted);
+        tip.append('text').attr('x',tx+9).attr('y',ty+71).attr('fill','#93c5fd').style('font-size','8px').text('Target: '+p.target);
+      }).on('mouseleave',function(){tip.selectAll('*').remove();});
+    });
+    loadEl.style.display='none';svgEl.style.display='block';
+  }
+
+  if(topo){render(topo);return;}
+  d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(tp=>{topo=tp;render(tp);}).catch(()=>{loadEl.innerHTML='<span style="padding:20px">Map unavailable — requires internet connection</span>';});
+}
+
+function buildAllCharts(){
+  const g={color:'#f1f5f9'},xt={font:{size:9}},yt={font:{size:9}};
+  const Q=['Q3 2025','Q4 2025','Q1 2026'];
+  mkC('c-trend',{type:'line',data:{labels:['Baseline',...Q],datasets:[{label:'PDO1: teachers (%)',data:[0,8.2,18.5,31.4],borderColor:'#2a78d6',backgroundColor:'rgba(42,120,214,0.1)',tension:.35,fill:true,pointRadius:4},{label:'PDO3: reading (%)',data:[65,65,65,66.8],borderColor:'#eb6834',backgroundColor:'rgba(235,104,52,0.08)',tension:.35,fill:true,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:false,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  mkC('c-donut',{type:'doughnut',data:{labels:['On track','At risk','Off track'],datasets:[{data:[9,7,3],backgroundColor:['#0ca30c','#fab219','#d03b3b'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:5}}}}});
+  mkC('c-ece-bar',{type:'bar',data:{labels:PSHORT,datasets:[{data:DATA.ece.map(p=>p.complete),backgroundColor:'#7c3aed',borderRadius:3,label:'Centres confirmed'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  mkC('c-mos',{type:'doughnut',data:{labels:['All 6 MOS','4-5 MOS','1-3 MOS'],datasets:[{data:[23,10,5],backgroundColor:['#0ca30c','#fab219','#d03b3b'],borderWidth:2,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{position:'bottom',labels:{font:{size:9},boxWidth:10,padding:4}}}}});
+  mkC('c-ttrend',{type:'line',data:{labels:Q,datasets:[{label:'Total trained',data:[320,1240,2870],borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,0.1)',tension:.35,fill:true,pointRadius:4},{label:'Female trained',data:[122,496,1177],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.07)',tension:.35,fill:true,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  mkC('c-obs',{type:'bar',data:{labels:PSHORT,datasets:[{label:'Pre-training avg',data:[38,41,36,43,39,42,37,35],backgroundColor:'rgba(22,163,74,0.3)',borderRadius:2},{label:'Post-training avg',data:[62,66,58,69,64,67,60,56],backgroundColor:'#16a34a',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,max:100,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  barChart('c-tlm-bar',DATA.tlm);
+  barChart('c-infra-bar',DATA.infra);
+  barChart('c-ict-bar',DATA.ict);
+  mkC('c-pdo',{type:'line',data:{labels:['Baseline','Q3 2025','Q4 2025','Q1 2026'],datasets:[{label:'PDO1: teachers (%)',data:[0,8.2,18.5,31.4],borderColor:'#2a78d6',tension:.35,pointRadius:4},{label:'PDO3: reading (%)',data:[65,65,65,66.8],borderColor:'#eb6834',tension:.35,pointRadius:4},{label:'PDO4: math (%)',data:[77,77,77,78.2],borderColor:'#6250d6',tension:.35,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:5}}},scales:{y:{beginAtZero:false,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  mkC('c-grm',{type:'bar',data:{labels:Q,datasets:[{label:'Received',data:[8,12,21],backgroundColor:'rgba(219,39,119,0.3)',borderRadius:3},{label:'Resolved',data:[8,11,18],backgroundColor:'#db2777',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
+  mkC('c-prov',{type:'bar',data:{labels:PSHORT,datasets:[{label:'On track',data:[5,4,3,6,4,5,3,4],backgroundColor:'#0ca30c',stack:'s'},{label:'At risk',data:[2,2,3,1,2,2,3,2],backgroundColor:'#fab219',stack:'s'},{label:'Off track',data:[1,2,2,1,2,1,2,2],backgroundColor:'#d03b3b',stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:5}}},scales:{y:{beginAtZero:true,stacked:true,ticks:yt,grid:g},x:{stacked:true,ticks:xt,grid:{display:false}}}}});
+  mkC('c-disb',{type:'bar',data:{labels:['C1: ECE','C2: Teachers+TLM','C3: Infra+ICT','C4: M&E'],datasets:[{label:'FY26 plan ($M)',data:[.8,4.2,1.5,.5],backgroundColor:'rgba(46,117,182,0.3)',borderRadius:3},{label:'FY26 actual ($M)',data:[.6,3.8,1.2,.4],backgroundColor:'#2E75B6',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:{...yt,callback:v=>'$'+v+'M'},grid:g},x:{ticks:xt,grid:{display:false}}}}});
+}
+
+function buildRF(){
+  const rows=[
+    ['PDO1: % prep–G2 teachers with improved practice','PDO',0,60,8.2,18.5,31.4,'on',false],
+    ['PDO2: Schools completing refurbishment','PDO',0,3500,0,45,163,'risk',true],
+    ['PDO3: Grade 2 reading proficiency (%)','PDO',65,75,65,65,66.8,'risk',false],
+    ['PDO4: Grade 2 math proficiency (%)','PDO',77,87,77,77,78.2,'risk',false],
+    ['C1.1: ECE centres with sub-grants','Int.',0,150,0,12,38,'risk',false],
+    ['C1.2: Children enrolled in ECE pilots','Int.',0,4500,0,286,912,'risk',false],
+    ['C1.3: ECE centres meeting all MOS (%)','Int.',0,80,0,42,61,'on',false],
+    ['C2.1: Teachers trained — structured pedagogy','Int.',0,9000,320,1240,2870,'on',false],
+    ['C2.2: % female teachers trained','Int.',39,45,38,40,41,'risk',false],
+    ['C2.4: Teachers completing diploma upgrading','Int.',0,480,0,0,24,'off',false],
+    ['C2.5: CE — % teachers satisfied with training','Int.',0,80,72,76,79,'on',false],
+    ['★ TLM: Schools confirmed book receipt','Int.',0,743,0,210,487,'risk',true],
+    ['★ C3: Schools with construction complete','Int.',0,3500,0,45,163,'risk',true],
+    ['★ C3: ICT hubs fully operational','Int.',0,200,0,18,67,'risk',true],
+    ['C3.3: Annual census submission rate (%)','Int.',42,95,42,58,71,'on',false],
+    ['C4.1: Quarterly progress reports on time','Int.',0,24,1,2,3,'on',false],
+    ['C4.2: GRM grievances resolved ≤30 days (%)','Int.',0,90,100,88,84,'on',false],
+  ];
+  const tb=document.getElementById('rf-body');
+  rows.forEach(r=>{
+    const[ind,lvl,base,tgt,q3,q4,q1,st,isHot]=r;
+    const pct=tgt===base?0:Math.round((q1-base)/(tgt-base)*100);
+    const sc=st==='on'?'son':st==='risk'?'srisk':'soff';
+    const stxt=st==='on'?'On track':st==='risk'?'At risk':'Off track';
+    const lbdg=lvl==='PDO'?'<span class="pdb">PDO</span>':'<span class="ib">Int.</span>';
+    const bc=pct>=60?'#0ca30c':pct>=30?'#fab219':'#d03b3b';
+    const bar='<div style="display:flex;align-items:center;gap:4px"><div style="flex:1;background:#f1f5f9;border-radius:2px;height:4px"><div style="width:'+Math.min(pct,100)+'%;height:4px;border-radius:2px;background:'+bc+'"></div></div><span style="font-size:9px;color:#94a3b8;min-width:22px">'+pct+'%</span></div>';
+    const rowClass=isHot?'ht-row':'';
+    const hotIcon=isHot?'<span style="color:#f59e0b;margin-right:3px" title="Management priority">&#9733;</span>':'';
+    const sonClass=st==='on'?'background:#dcfce7;color:#166534':st==='risk'?'background:#fef9c3;color:#854d0e':'background:#fee2e2;color:#991b1b';
+    tb.innerHTML+=`<tr class="${rowClass}"><td style="max-width:200px">${hotIcon}${ind}</td><td style="text-align:center">${lbdg}</td><td style="text-align:center">${base}</td><td style="text-align:center">${q3}</td><td style="text-align:center">${q4}</td><td style="text-align:center;font-weight:600">${q1}</td><td style="text-align:center;color:#94a3b8">${tgt}</td><td style="min-width:85px">${bar}</td><td><span style="padding:2px 7px;border-radius:12px;font-size:9px;font-weight:600;display:inline-block;${sonClass}">${stxt}</span></td></tr>`;
+  });
+}
+
+function buildHtOverview(){
+  const topics=[
+    {title:'Teaching &amp; Learning Materials',src:'Bluetree T&amp;T',data:DATA.tlm,unit:'schools'},
+    {title:'School Infrastructure Grants',src:'KoboToolbox',data:DATA.infra,unit:'schools'},
+    {title:'ICT Hub Refurbishment',src:'KoboToolbox',data:DATA.ict,unit:'hubs'},
+  ];
+  const el=document.getElementById('ht-overview-cards');
+  topics.forEach(t=>{
+    const total=t.data.reduce((s,p)=>s+p.target,0);
+    const complete=t.data.reduce((s,p)=>s+p.complete,0);
+    const inp=t.data.reduce((s,p)=>s+p.inprogress,0);
+    const ns=t.data.reduce((s,p)=>s+p.notstarted,0);
+    const pProvs=t.data.map(p=>{
+      const s=provSt(p);
+      return `<span class="ht-pp ht-pp-${s[0]}" title="${p.name}: ${stLabel(p)}">${p.name.split(' ')[0]}</span>`;
+    }).join('');
+    const cPct=Math.round(complete/total*100);
+    const iPct=Math.round(inp/total*100);
+    const nPct=100-cPct-iPct;
+    el.innerHTML+=`<div class="ht-ov-card">
+      <div class="ht-ov-title">${t.title}</div>
+      <div class="ht-ov-src">${t.src}</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px">
+        <span style="color:#166534;font-weight:700">${complete} complete</span>
+        <span style="color:#854d0e">${inp} in progress</span>
+        <span style="color:#991b1b">${ns} not started</span>
+      </div>
+      <div class="ht-stack">
+        <div style="width:${cPct}%;background:#16a34a"></div>
+        <div style="width:${iPct}%;background:#d97706"></div>
+        <div style="width:${Math.max(nPct,0)}%;background:#dc2626"></div>
+      </div>
+      <div class="ht-prov-pills">${pProvs}</div>
+    </div>`;
+  });
+}
+
+const tabMaps={
+  ece:()=>{if(!mapBuilt.ece){buildMap('ms-ece','ml-ece',DATA.ece);mapBuilt.ece=true;}},
+  teacher:()=>{if(!mapBuilt.tlm){buildMap('ms-tlm','ml-tlm',DATA.tlm);mapBuilt.tlm=true;}miniTable('tbl-tlm-mini',DATA.tlm,'schools');},
+  infra:()=>{if(!mapBuilt.infra){buildMap('ms-infra','ml-infra',DATA.infra);buildMap('ms-ict','ml-ict',DATA.ict);mapBuilt.infra=true;}miniTable('tbl-infra-mini',DATA.infra,'schools');miniTable('tbl-ict-mini',DATA.ict,'hubs');},
+};
+
+document.querySelector('.nav').addEventListener('click',function(e){
+  const tab=e.target.closest('.ntab');if(!tab)return;
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  tab.classList.add('on');
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+tab.dataset.tab).classList.add('on');
+  const fn=tabMaps[tab.dataset.tab];if(fn)fn();
+  buildAllCharts();
+});
+
+buildRF();
+buildHtOverview();
+buildAllCharts();
+</script>
+</body>
+</html>
