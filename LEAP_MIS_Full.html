@@ -111,6 +111,43 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 .ht-pp-n{background:#fee2e2;color:#991b1b}
 
 @media(max-width:760px){.kg{grid-template-columns:1fr 1fr}.g2,.g2e,.g2r{grid-template-columns:1fr}.g3{grid-template-columns:1fr}.ht-overview{grid-template-columns:1fr}}
+
+/* MANAGEMENT FILTER BAR */
+.mgmt-bar{background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:10px 14px;margin-bottom:13px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mgmt-bar-label{font-size:10px;font-weight:700;color:#475569;white-space:nowrap}
+.mgmt-select{font-size:11px;padding:5px 10px;border:1.5px solid #cbd5e1;border-radius:7px;color:#1e293b;background:#fff;cursor:pointer;font-family:inherit}
+.mgmt-select:focus{outline:none;border-color:#2E75B6}
+.mgmt-toggle{display:flex;gap:0;border:1.5px solid #e2e8f0;border-radius:7px;overflow:hidden;flex-shrink:0}
+.mtog{padding:5px 12px;border:none;background:#fff;font-size:10px;font-weight:600;color:#64748b;cursor:pointer;transition:all 0.15s;font-family:inherit;white-space:nowrap}
+.mtog:hover{background:#f1f5f9}
+.mtog.on{background:#1F3864;color:#fff}
+.mgmt-insight{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:600;margin-left:auto}
+.mi-warn{background:#fef9c3;color:#854d0e}
+.mi-alert{background:#fee2e2;color:#991b1b}
+.mi-ok{background:#dcfce7;color:#166534}
+.mi-info{background:#dbeafe;color:#1e40af}
+/* ACTION LIST */
+.action-list{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:13px}
+.action-list-hdr{background:#1F3864;color:#fff;padding:8px 14px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.action-row{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid #f1f5f9;font-size:11px}
+.action-row:last-child{border-bottom:none}
+.action-row:hover{background:#f8fafc}
+.ar-school{font-weight:600;color:#1e293b}
+.ar-detail{color:#64748b;font-size:10px}
+.ar-status{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
+/* INSIGHT CARD */
+.insight-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:13px}
+.insight-card{border-radius:8px;padding:10px 12px;border:1.5px solid}
+.ic-red{background:#fef2f2;border-color:#fecaca}
+.ic-amber{background:#fffbeb;border-color:#fde68a}
+.ic-green{background:#f0fdf4;border-color:#bbf7d0}
+.ic-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.ic-val{font-size:20px;font-weight:700;line-height:1;margin-bottom:2px}
+.ic-sub{font-size:10px;line-height:1.3}
+.ic-red .ic-label{color:#991b1b}.ic-red .ic-val{color:#991b1b}.ic-red .ic-sub{color:#7f1d1d}
+.ic-amber .ic-label{color:#854d0e}.ic-amber .ic-val{color:#854d0e}.ic-amber .ic-sub{color:#78350f}
+.ic-green .ic-label{color:#166534}.ic-green .ic-val{color:#166534}.ic-green .ic-sub{color:#14532d}
+
 </style>
 </head>
 <body>
@@ -163,6 +200,27 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 
 <!-- ===== C1 ECE ===== -->
 <div class="pg" id="pg-ece">
+
+  <div class="mgmt-bar">
+    <div class="mgmt-bar-label">Province in focus:</div>
+    <select class="mgmt-select" id="ece-prov-sel" onchange="updateEce()">
+      <option value="all">All 8 provinces</option>
+      <option value="0">Western Highlands</option>
+      <option value="1">Enga</option>
+      <option value="2">Eastern Highlands</option>
+      <option value="3">Sandaun</option>
+      <option value="4">Madang</option>
+      <option value="5">Morobe</option>
+      <option value="6">Central</option>
+      <option value="7">Bougainville</option>
+    </select>
+    <div class="mgmt-toggle">
+      <button class="mtog on" onclick="setEceView('subgrant',this)">Sub-grant progress</button>
+      <button class="mtog" onclick="setEceView('mos',this)">MOS compliance by standard</button>
+    </div>
+    <div class="mgmt-insight mi-warn" id="ece-insight">&#9888; 3 provinces below 25% sub-grant disbursement</div>
+  </div>
+
   <div class="kg">
     <div class="kc cp"><div class="kl">ECE centres with sub-grants</div><div class="kv">38</div><div class="ks">Target: 150 centres</div><div class="kt"><div class="kf" style="width:25%;background:#7c3aed"></div></div><div class="kprow"><span>25% of target</span><span>112 remaining</span></div></div>
     <div class="kc cp"><div class="kl">Children enrolled in ECE pilots</div><div class="kv">912</div><div class="ks">Target: 4,500 children</div><div class="kt"><div class="kf" style="width:20%;background:#7c3aed"></div></div><div class="kprow"><span>20% of target</span></div></div>
@@ -188,6 +246,25 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 
 <!-- ===== C2 TEACHERS + TLM ===== -->
 <div class="pg" id="pg-teacher">
+
+  <div class="mgmt-bar">
+    <div class="mgmt-bar-label">Training analysis:</div>
+    <select class="mgmt-select" id="train-type-sel" onchange="updateTeacher()">
+      <option value="all">All training types</option>
+      <option value="0">Literacy &amp; numeracy — structured pedagogy</option>
+      <option value="1">Pedagogy leadership &amp; SLIP</option>
+      <option value="2">GESI &amp; behaviour management</option>
+      <option value="3">Child protection &amp; GBV</option>
+      <option value="4">Cluster-based learning circles</option>
+    </select>
+    <div class="mgmt-toggle">
+      <button class="mtog on" onclick="setTeacherView('training',this)">Training progress</button>
+      <button class="mtog" onclick="setTeacherView('gender',this)">Gender gap by province</button>
+      <button class="mtog" onclick="setTeacherView('obs',this)">Classroom impact scores</button>
+    </div>
+    <div class="mgmt-insight mi-warn" id="teacher-insight">&#9888; 3 provinces below 40% female trained</div>
+  </div>
+
   <div class="kg">
     <div class="kc cg"><div class="kl">Teachers trained — structured pedagogy</div><div class="kv">2,870</div><div class="ks">Target: 9,000</div><div class="kt"><div class="kf" style="width:32%;background:#16a34a"></div></div><div class="kprow"><span>32% of target</span></div></div>
     <div class="kc cg"><div class="kl">% female teachers trained</div><div class="kv">41%</div><div class="ks">Target: 45% · Baseline: 39%</div><div class="kt"><div class="kf" style="width:67%;background:#16a34a"></div></div><div class="kprow"><span>67% to target</span></div></div>
@@ -214,6 +291,35 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
         <div style="font-size:10px;color:#854d0e;margin-top:2px">256 schools pending receipt confirmation</div>
       </div>
     </div>
+    
+    <div class="mgmt-bar" style="background:#fffbeb;border-color:#fde68a">
+      <div class="mgmt-bar-label" style="color:#78350f">TLM focus:</div>
+      <select class="mgmt-select" id="tlm-prov-sel" onchange="updateTlm()">
+        <option value="all">All 8 provinces</option>
+        <option value="action">Provinces requiring follow-up action</option>
+        <option value="0">Western Highlands</option>
+        <option value="1">Enga</option>
+        <option value="2">Eastern Highlands</option>
+        <option value="3">Sandaun</option>
+        <option value="4">Madang</option>
+        <option value="5">Morobe</option>
+        <option value="6">Central</option>
+        <option value="7">Bougainville</option>
+      </select>
+      <div class="mgmt-toggle">
+        <button class="mtog on" onclick="setTlmView('status',this)">Province delivery status</button>
+        <button class="mtog" onclick="setTlmView('action',this)">Action list — unconfirmed schools</button>
+      </div>
+      <div class="mgmt-insight mi-alert" id="tlm-insight">&#9888; Bougainville: 82 schools unconfirmed</div>
+    </div>
+    <div id="tlm-action-list" style="display:none">
+      <div class="action-list">
+        <div class="action-list-hdr"><span>Schools with unconfirmed TLM delivery — follow-up required</span><span id="tlm-action-count">6 schools</span></div>
+        <div id="tlm-action-rows"></div>
+      </div>
+    </div>
+
+    <div id="tlm-chart-view">
     <div class="g2">
       <div>
         <div class="ct" style="color:#78350f">Province-level delivery status — Papua New Guinea</div>
@@ -236,6 +342,35 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 
 <!-- ===== C3 INFRASTRUCTURE + ICT ===== -->
 <div class="pg" id="pg-infra">
+
+  <div class="mgmt-bar">
+    <div class="mgmt-bar-label">Construction view:</div>
+    <select class="mgmt-select" id="infra-status-sel" onchange="updateInfra()">
+      <option value="all">All grant recipients</option>
+      <option value="stalled">Stalled — grant issued, works not started</option>
+      <option value="progress">Works currently in progress</option>
+      <option value="complete">Works verified complete</option>
+    </select>
+    <select class="mgmt-select" id="infra-prov-sel" onchange="updateInfra()">
+      <option value="all">All provinces</option>
+      <option value="0">Western Highlands</option>
+      <option value="1">Enga</option>
+      <option value="2">Eastern Highlands</option>
+      <option value="3">Sandaun</option>
+      <option value="4">Madang</option>
+      <option value="5">Morobe</option>
+      <option value="6">Central</option>
+      <option value="7">Bougainville</option>
+    </select>
+    <div class="mgmt-insight mi-alert" id="infra-insight">&#9888; 14 schools: grant disbursed but works not started</div>
+  </div>
+  <div id="infra-stalled-list" style="display:none">
+    <div class="action-list">
+      <div class="action-list-hdr"><span>&#9888; Stalled construction grants — PDoE follow-up required</span><span id="infra-stalled-count"></span></div>
+      <div id="infra-stalled-rows"></div>
+    </div>
+  </div>
+
   <div class="kg">
     <div class="kc cg"><div class="kl">Schools — refurbishment complete (PDO 2)</div><div class="kv">163</div><div class="ks">Target: 3,500 · Grants issued: 245</div><div class="kt"><div class="kf" style="width:5%;background:#16a34a"></div></div><div class="kprow"><span>5% of total target</span><span>67% of grants issued</span></div></div>
     <div class="kc ca"><div class="kl">Schools — construction in progress</div><div class="kv">68</div><div class="ks">Works ongoing · KoboToolbox verified</div><div class="kt"><div class="kf" style="width:28%;background:#d97706"></div></div><div class="kprow"><span>28% of grants issued</span></div></div>
@@ -275,6 +410,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
         </div>
       </div>
     </div>
+    </div><!-- tlm-chart-view -->
   </div>
 
   <div class="hot-section" style="margin-bottom:0">
@@ -292,6 +428,30 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
         <div style="font-size:10px;color:#854d0e;margin-top:2px">200 hubs planned across 8 provinces · 34% complete</div>
       </div>
     </div>
+    
+    <div class="mgmt-bar" style="background:#fffbeb;border-color:#fde68a">
+      <div class="mgmt-bar-label" style="color:#78350f">ICT bottleneck analysis:</div>
+      <div class="mgmt-toggle">
+        <button class="mtog on" onclick="setIctView('overview',this)">Province overview</button>
+        <button class="mtog" onclick="setIctView('contractor',this)">Where is the bottleneck?</button>
+      </div>
+      <div class="mgmt-insight mi-alert" id="ict-insight">&#9888; Connectivity: biggest single bottleneck — 133 hubs blocked</div>
+    </div>
+    <div id="ict-contractor-view" style="display:none;margin-bottom:13px">
+      <div class="insight-grid">
+        <div class="insight-card ic-green"><div class="ic-label">Room refurbishment</div><div class="ic-val">112</div><div class="ic-sub">hubs complete · 88 outstanding</div></div>
+        <div class="insight-card ic-green"><div class="ic-label">Furniture (desks/chairs)</div><div class="ic-val">98</div><div class="ic-sub">hubs complete · 102 outstanding</div></div>
+        <div class="insight-card ic-amber"><div class="ic-label">Devices &amp; equipment</div><div class="ic-val">87</div><div class="ic-sub">hubs complete · 113 outstanding</div></div>
+        <div class="insight-card ic-red"><div class="ic-label">&#9888; Connectivity</div><div class="ic-val">67</div><div class="ic-sub">hubs functional · 133 blocked — largest bottleneck</div></div>
+        <div class="insight-card ic-amber"><div class="ic-label">Power backup</div><div class="ic-val">78</div><div class="ic-sub">hubs complete · 122 outstanding</div></div>
+        <div class="insight-card ic-red"><div class="ic-label">Fully operational (all 5)</div><div class="ic-val">54</div><div class="ic-sub">of 200 hubs · connectivity is the binding constraint</div></div>
+      </div>
+      <div style="background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:11px;color:#7f1d1d">
+        <strong>Management action:</strong> Connectivity is the binding constraint preventing 133 hubs from becoming operational. Devices, furniture and room refurbishment are largely on track. Priority engagement required with Digicel PNG and Telikom PNG on province-level rollout schedule.
+      </div>
+    </div>
+
+    <div id="ict-chart-view">
     <div class="g2">
       <div>
         <div class="ct" style="color:#78350f">ICT hub status by province — Papua New Guinea</div>
@@ -314,6 +474,47 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 
 <!-- ===== C4 M&E ===== -->
 <div class="pg" id="pg-me">
+
+  <div class="mgmt-bar">
+    <div class="mgmt-bar-label">Reporting analysis:</div>
+    <div class="mgmt-toggle">
+      <button class="mtog on" onclick="setMeView('grm',this)">GRM performance</button>
+      <button class="mtog" onclick="setMeView('reporting',this)">Provincial reporting timeliness</button>
+      <button class="mtog" onclick="setMeView('risks',this)">Active risk register</button>
+    </div>
+    <div class="mgmt-insight mi-warn" id="me-insight">&#9888; 2 provinces with late report submissions</div>
+  </div>
+  <div id="me-reporting-view" style="display:none;margin-bottom:13px">
+    <div class="action-list">
+      <div class="action-list-hdr"><span>Quarterly report submission — timeliness by province</span><span>Q1–Q3 2025 to Q1 2026</span></div>
+      <div class="action-row"><span class="ar-school">Western Highlands</span><span class="ar-detail">Reporter: James Kama</span><span class="ar-status" style="background:#dcfce7;color:#166534">3/3 on time</span></div>
+      <div class="action-row"><span class="ar-school">Enga</span><span class="ar-detail">Reporter: Mary Polon</span><span class="ar-status" style="background:#fef9c3;color:#854d0e">2/3 — Q3 late</span></div>
+      <div class="action-row"><span class="ar-school">Eastern Highlands</span><span class="ar-detail">Reporter: K. Kopen</span><span class="ar-status" style="background:#dcfce7;color:#166534">3/3 on time</span></div>
+      <div class="action-row"><span class="ar-school">Sandaun</span><span class="ar-detail">Reporter: Peter Wasi</span><span class="ar-status" style="background:#fee2e2;color:#991b1b">1/3 — pattern of late submission</span></div>
+      <div class="action-row"><span class="ar-school">Madang</span><span class="ar-detail">Reporter: B. Kal</span><span class="ar-status" style="background:#dcfce7;color:#166534">3/3 on time</span></div>
+      <div class="action-row"><span class="ar-school">Morobe</span><span class="ar-detail">Reporter: Grace Timi</span><span class="ar-status" style="background:#fef9c3;color:#854d0e">2/3 — Q4 late</span></div>
+      <div class="action-row"><span class="ar-school">Central</span><span class="ar-detail">Reporter: Tom Naime</span><span class="ar-status" style="background:#dcfce7;color:#166534">3/3 on time</span></div>
+      <div class="action-row"><span class="ar-school">Bougainville</span><span class="ar-detail">Reporter: Anna Siriosi</span><span class="ar-status" style="background:#dcfce7;color:#166534">3/3 on time</span></div>
+    </div>
+  </div>
+  <div id="me-risk-view" style="display:none;margin-bottom:13px">
+    <div class="action-list">
+      <div class="action-list-hdr"><span>Active implementation risks — Q1 2026</span><span>3 active</span></div>
+      <div class="action-row" style="align-items:flex-start;gap:10px">
+        <div><div class="ar-school">Procurement delays — textbook printing</div><div class="ar-detail" style="margin-top:2px">SR-G3 for Nawaeb and Kandep not yet dispatched · 20 Mar target at risk</div></div>
+        <span class="ar-status" style="background:#fee2e2;color:#991b1b">High</span>
+      </div>
+      <div class="action-row" style="align-items:flex-start;gap:10px">
+        <div><div class="ar-school">M&E staffing — Sandaun province</div><div class="ar-detail" style="margin-top:2px">Province M&E officer position vacant since Jan 2026 · reporting quality affected</div></div>
+        <span class="ar-status" style="background:#fee2e2;color:#991b1b">High</span>
+      </div>
+      <div class="action-row" style="align-items:flex-start;gap:10px">
+        <div><div class="ar-school">Annual census submission rate — below trajectory</div><div class="ar-detail" style="margin-top:2px">71% vs 80% Q1 target · Bougainville and Sandaun lagging</div></div>
+        <span class="ar-status" style="background:#fef9c3;color:#854d0e">Medium</span>
+      </div>
+    </div>
+  </div>
+
   <div class="kg">
     <div class="kc cpk"><div class="kl">Quarterly reports submitted on time</div><div class="kv">3 / 3</div><div class="ks">100% on time this period</div><div class="kt"><div class="kf" style="width:100%;background:#db2777"></div></div></div>
     <div class="kc cpk"><div class="kl">GRM grievances resolved ≤30 days</div><div class="kv">84%</div><div class="ks">Target: 90% · 18 of 21 resolved</div><div class="kt"><div class="kf" style="width:93%;background:#db2777"></div></div><div class="kprow"><span>Near target</span></div></div>
@@ -329,6 +530,16 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
 
 <!-- ===== DISBURSEMENTS ===== -->
 <div class="pg" id="pg-disb">
+
+  <div class="mgmt-bar">
+    <div class="mgmt-bar-label">View disbursements by:</div>
+    <div class="mgmt-toggle">
+      <button class="mtog on" onclick="setDisbView('component',this)">Component</button>
+      <button class="mtog" onclick="setDisbView('year',this)">Fiscal year trajectory</button>
+    </div>
+    <div class="mgmt-insight mi-info" id="disb-insight">&#8594; FY2026 disbursement rate: 86% of plan</div>
+  </div>
+
   <div class="kg3">
     <div class="kc cb"><div class="kl">Total project budget</div><div class="kv">$150M</div><div class="ks">IDA financing · Phase 1</div></div>
     <div class="kc cb"><div class="kl">Cumulative disbursed FY2026</div><div class="kv">$6.0M</div><div class="ks">4.0% of total budget</div><div class="kt"><div class="kf" style="width:4%;background:#2E75B6"></div></div></div>
@@ -580,6 +791,219 @@ document.querySelector('.nav').addEventListener('click',function(e){
 buildRF();
 buildHtOverview();
 buildAllCharts();
+
+// ═══════════════════════════════════════════════════════════════
+// MANAGEMENT INTERACTIVE FILTERS
+// ═══════════════════════════════════════════════════════════════
+
+const PSHORT8=['W.Highlands','Enga','E.Highlands','Sandaun','Madang','Morobe','Central','Bougainville'];
+const PLONG8=['Western Highlands','Enga','Eastern Highlands','Sandaun','Madang','Morobe','Central','Bougainville'];
+
+// ── ECE ──────────────────────────────────────────────────────────────────
+const ECE_SUBGRANT_ALL=[8,6,5.5,3.5,6.5,5.5,4.5,3];
+const ECE_TARGETS=[10,8,8,6,8,8,7,7];
+const MOS_STANDARDS=['Learning materials','Teacher qualifications','Attendance registers','Nutrition & feeding','Infrastructure standard','Child safeguarding'];
+const MOS_FAIL_RATES=[42,28,18,55,35,12];
+let eceView='subgrant';
+
+function setEceView(v,btn){
+  eceView=v;
+  document.querySelectorAll('#pg-ece .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  updateEce();
+}
+function updateEce(){
+  const sel=document.getElementById('ece-prov-sel').value;
+  if(eceView==='subgrant'){
+    document.getElementById('c-ece-bar').parentElement.style.display='block';
+    document.getElementById('c-mos').parentElement.style.display='block';
+    let data=ECE_SUBGRANT_ALL,labels=PSHORT8,targets=ECE_TARGETS;
+    if(sel!=='all'){
+      const i=parseInt(sel);
+      data=[ECE_SUBGRANT_ALL[i]];labels=[PLONG8[i]];targets=[ECE_TARGETS[i]];
+      const gap=targets[0]-data[0];
+      document.getElementById('ece-insight').className='mgmt-insight '+(gap>4?'mi-alert':'mi-warn');
+      document.getElementById('ece-insight').textContent=(gap>4?'⚠ ':'→ ')+PLONG8[i]+': '+data[0]+' centres with sub-grants · '+gap+' still to be reached';
+    } else {
+      const behind=ECE_SUBGRANT_ALL.filter((v,i)=>v<ECE_TARGETS[i]*0.25).length;
+      document.getElementById('ece-insight').className='mgmt-insight '+(behind>2?'mi-alert':'mi-warn');
+      document.getElementById('ece-insight').textContent='⚠ '+behind+' provinces below 25% sub-grant disbursement';
+    }
+    if(ci['c-ece-bar'])ci['c-ece-bar'].destroy();
+    ci['c-ece-bar']=new Chart(document.getElementById('c-ece-bar'),{type:'bar',data:{labels,datasets:[
+      {label:'Centres with sub-grant',data,backgroundColor:'#7c3aed',borderRadius:3},
+      {label:'Province target',data:targets,backgroundColor:'rgba(124,58,237,0.15)',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+  } else {
+    if(ci['c-mos'])ci['c-mos'].destroy();
+    ci['c-mos']=new Chart(document.getElementById('c-mos'),{type:'bar',data:{labels:MOS_STANDARDS,datasets:[{label:'% of centres failing this standard',data:MOS_FAIL_RATES,backgroundColor:MOS_FAIL_RATES.map(v=>v>=40?'#dc2626':v>=25?'#d97706':'#16a34a'),borderRadius:3}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'% of centres not meeting this standard'}}},scales:{x:{beginAtZero:true,max:100,ticks:{font:{size:9},callback:v=>v+'%'},grid:{color:'#f1f5f9'}},y:{ticks:{font:{size:9}},grid:{display:false}}}}});
+    document.getElementById('ece-insight').className='mgmt-insight mi-alert';
+    document.getElementById('ece-insight').textContent='⚠ Nutrition & feeding: 55% of centres failing — highest gap';
+  }
+}
+
+// ── TEACHER ───────────────────────────────────────────────────────────────
+const TRAIN_TYPES=['Literacy & numeracy','Pedagogy leadership','GESI & behaviour','Child protection','Cluster circles'];
+const TRAIN_COUNTS=[1240,680,420,310,220];
+const TRAIN_TARGETS=[3600,1800,1200,900,500];
+const GENDER_PCT=[41,38,44,36,43,40,38,35];
+let teacherView='training';
+
+function setTeacherView(v,btn){
+  teacherView=v;
+  document.querySelectorAll('#pg-teacher .mgmt-bar .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  updateTeacher();
+}
+function updateTeacher(){
+  const sel=document.getElementById('train-type-sel').value;
+  if(teacherView==='training'){
+    let labels=TRAIN_TYPES,data=TRAIN_COUNTS,targets=TRAIN_TARGETS;
+    if(sel!=='all'){const i=parseInt(sel);labels=[TRAIN_TYPES[i]];data=[TRAIN_COUNTS[i]];targets=[TRAIN_TARGETS[i]];}
+    if(ci['c-ttrend'])ci['c-ttrend'].destroy();
+    ci['c-ttrend']=new Chart(document.getElementById('c-ttrend'),{type:'bar',data:{labels,datasets:[
+      {label:'Trained to date',data,backgroundColor:'#16a34a',borderRadius:3},
+      {label:'Phase 1 target',data:targets,backgroundColor:'rgba(22,163,74,0.15)',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9}},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9},maxRotation:30},grid:{display:false}}}}});
+    document.getElementById('teacher-insight').className='mgmt-insight mi-info';
+    document.getElementById('teacher-insight').textContent='→ Diploma upgrading: lowest progress — 24 complete of 480 target';
+  } else if(teacherView==='gender'){
+    if(ci['c-obs'])ci['c-obs'].destroy();
+    ci['c-obs']=new Chart(document.getElementById('c-obs'),{type:'bar',data:{labels:PSHORT8,datasets:[{label:'% female teachers trained',data:GENDER_PCT,backgroundColor:GENDER_PCT.map(v=>v>=42?'#16a34a':v>=38?'#d97706':'#dc2626'),borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.raw+'% of those trained are female (target: 45%)'}}},scales:{y:{beginAtZero:true,max:60,ticks:{font:{size:9},callback:v=>v+'%'},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+    const below=GENDER_PCT.filter(v=>v<40).length;
+    document.getElementById('teacher-insight').className='mgmt-insight '+(below>2?'mi-alert':'mi-warn');
+    document.getElementById('teacher-insight').textContent='⚠ '+below+' provinces below 40% female — Sandaun and Bougainville require targeted outreach';
+  } else {
+    if(ci['c-ttrend'])ci['c-ttrend'].destroy();
+    const pre=[38,41,36,43,39,42,37,35],post=[62,66,58,69,64,67,60,56];
+    ci['c-ttrend']=new Chart(document.getElementById('c-ttrend'),{type:'bar',data:{labels:PSHORT8,datasets:[
+      {label:'Avg score before training',data:pre,backgroundColor:'rgba(22,163,74,0.3)',borderRadius:2},
+      {label:'Avg score after training',data:post,backgroundColor:'#16a34a',borderRadius:2},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}},tooltip:{callbacks:{afterBody:items=>{const diff=post[items[0].dataIndex]-pre[items[0].dataIndex];return 'Improvement: +'+diff+' points';
+    }}}},scales:{y:{beginAtZero:true,max:100,ticks:{font:{size:9}},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+    document.getElementById('teacher-insight').className='mgmt-insight mi-ok';
+    document.getElementById('teacher-insight').textContent='→ Average improvement: +25 points across all provinces';
+  }
+}
+
+// ── TLM ───────────────────────────────────────────────────────────────────
+const TLM_DATA2=[
+  {prov:'Western Highlands',target:120,confirmed:120,pct:100,schools:[]},
+  {prov:'Enga',target:85,confirmed:52,pct:61,schools:[{name:'Laiagam Community School',issue:'At district office — road access delay'},{name:'Kandep Primary',issue:'At province hub — transport pending'}]},
+  {prov:'Eastern Highlands',target:110,confirmed:68,pct:62,schools:[{name:'Kainantu Primary',issue:'Partial delivery — 3 cartons missing'},{name:'Obura Secondary',issue:'Not yet delivered'}]},
+  {prov:'Sandaun',target:68,confirmed:38,pct:56,schools:[{name:'Vanimo Primary',issue:'Delivery scheduled 20 Mar'},{name:'Telefomin Community',issue:'Road access — helicopter delivery needed'}]},
+  {prov:'Madang',target:92,confirmed:92,pct:100,schools:[]},
+  {prov:'Morobe',target:105,confirmed:61,pct:58,schools:[{name:'Bumayong Primary',issue:'Wrong materials delivered — replacement dispatched'},{name:'Nawaeb Secondary',issue:'Not yet dispatched from warehouse'}]},
+  {prov:'Central',target:72,confirmed:47,pct:65,schools:[{name:'Rigo Primary',issue:'Confirmation pending from principal'}]},
+  {prov:'Bougainville',target:91,confirmed:9,pct:10,schools:[{name:'Buin Secondary',issue:'Province distribution not yet commenced'},{name:'Kieta Primary',issue:'Province distribution not yet commenced'},{name:'Arawa Community',issue:'Province distribution not yet commenced'}]},
+];
+let tlmView='status';
+function setTlmView(v,btn){
+  tlmView=v;
+  document.querySelectorAll('.hot-section .mgmt-bar .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  updateTlm();
+}
+function updateTlm(){
+  const sel=document.getElementById('tlm-prov-sel').value;
+  const chartView=document.getElementById('tlm-chart-view');
+  const actionView=document.getElementById('tlm-action-list');
+  if(tlmView==='action'){
+    chartView.style.display='none';actionView.style.display='block';
+    let rows=[];
+    const provs=sel==='action'||sel==='all'?TLM_DATA2:TLM_DATA2.filter((_,i)=>i===parseInt(sel));
+    provs.forEach(p=>{
+      if(p.pct===100)return;
+      p.schools.forEach(s=>rows.push('<div class="action-row"><div><div class="ar-school">'+s.name+'</div><div class="ar-detail">'+p.prov+' · '+s.issue+'</div></div><span class="ar-status" style="background:#fee2e2;color:#991b1b">Follow-up</span></div>'));
+    });
+    if(rows.length===0)rows=['<div class="action-row"><div class="ar-detail" style="color:#64748b;padding:4px 0">No outstanding deliveries for this selection</div></div>'];
+    document.getElementById('tlm-action-rows').innerHTML=rows.join('');
+    document.getElementById('tlm-action-count').textContent=Math.max(0,rows.length)+' schools';
+  } else {
+    chartView.style.display='block';actionView.style.display='none';
+    const behind=TLM_DATA2.filter(p=>p.pct<100);
+    document.getElementById('tlm-insight').className='mgmt-insight '+(behind.length>3?'mi-alert':'mi-warn');
+    document.getElementById('tlm-insight').textContent='⚠ Bougainville: 82 schools unconfirmed — province distribution not commenced';
+  }
+}
+
+// ── INFRASTRUCTURE ────────────────────────────────────────────────────────
+const INFRA_STALLED=[
+  {school:'Minj Secondary',prov:'Western Highlands',grant:'PGK 52,000',issued:'15 Nov 2025',issue:'Contractor not mobilised — 90 days elapsed'},
+  {school:'Kompiam Primary',prov:'Enga',grant:'PGK 38,000',issued:'20 Nov 2025',issue:'Materials procurement dispute with BoM'},
+  {school:'Telefomin Community',prov:'Sandaun',grant:'PGK 31,000',issued:'01 Dec 2025',issue:'Access road impassable — seasonal closure'},
+  {school:'Nuku Primary',prov:'Sandaun',grant:'PGK 29,000',issued:'01 Dec 2025',issue:'No response from school BoM since grant disbursed'},
+  {school:'Amanab Community',prov:'Sandaun',grant:'PGK 28,500',issued:'01 Dec 2025',issue:'Contractor withdrew — re-tendering required'},
+  {school:'Goilala Primary',prov:'Central',grant:'PGK 44,000',issued:'10 Nov 2025',issue:'Land dispute halting construction site access'},
+  {school:'Rigo Secondary',prov:'Central',grant:'PGK 51,000',issued:'10 Nov 2025',issue:'Contractor not mobilised — district flagged'},
+  {school:'Abau Community',prov:'Central',grant:'PGK 33,000',issued:'10 Nov 2025',issue:'No contractor engaged — BoM capacity issue'},
+  {school:'Buin Primary',prov:'Bougainville',grant:'PGK 37,000',issued:'05 Dec 2025',issue:'Province team access — delayed deployment'},
+  {school:'Arawa Secondary',prov:'Bougainville',grant:'PGK 62,000',issued:'05 Dec 2025',issue:'Contractor selected but contract not signed'},
+];
+function updateInfra(){
+  const status=document.getElementById('infra-status-sel').value;
+  const prov=document.getElementById('infra-prov-sel').value;
+  const stalledView=document.getElementById('infra-stalled-list');
+  if(status==='stalled'){
+    stalledView.style.display='block';
+    let rows=INFRA_STALLED;
+    if(prov!=='all')rows=rows.filter(r=>r.prov===PLONG8[parseInt(prov)]);
+    document.getElementById('infra-stalled-rows').innerHTML=rows.map(r=>'<div class="action-row" style="align-items:flex-start"><div><div class="ar-school">'+r.school+' — '+r.prov+'</div><div class="ar-detail" style="margin-top:2px">Grant: '+r.grant+' · Disbursed: '+r.issued+' · Issue: '+r.issue+'</div></div><span class="ar-status" style="background:#fee2e2;color:#991b1b;white-space:nowrap">&#9888; Stalled</span></div>').join('');
+    document.getElementById('infra-stalled-count').textContent=rows.length+' schools';
+    document.getElementById('infra-insight').className='mgmt-insight mi-alert';
+    document.getElementById('infra-insight').textContent='⚠ '+rows.length+' stalled grant'+(rows.length!==1?'s':'')+' shown — PDoE follow-up required';
+  } else {
+    stalledView.style.display='none';
+    document.getElementById('infra-insight').className='mgmt-insight mi-alert';
+    document.getElementById('infra-insight').textContent='⚠ 14 schools: grant disbursed but works not started';
+  }
+}
+
+// ── ICT ───────────────────────────────────────────────────────────────────
+function setIctView(v,btn){
+  document.querySelectorAll('.hot-section:last-of-type .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('ict-contractor-view').style.display=v==='contractor'?'block':'none';
+  document.getElementById('ict-chart-view').style.display=v==='overview'?'block':'none';
+}
+
+// ── M&E ───────────────────────────────────────────────────────────────────
+let meView='grm';
+function setMeView(v,btn){
+  meView=v;
+  document.querySelectorAll('#pg-me .mgmt-bar .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('me-reporting-view').style.display=v==='reporting'?'block':'none';
+  document.getElementById('me-risk-view').style.display=v==='risks'?'block':'none';
+  const grids=document.querySelectorAll('#pg-me .g2e, #pg-me .cc');
+  grids.forEach(el=>{el.style.display=v==='grm'?'':'none';});
+  document.getElementById('me-insight').className='mgmt-insight '+(v==='risks'?'mi-alert':'mi-warn');
+  document.getElementById('me-insight').textContent=v==='risks'?'⚠ 2 high-priority risks require TTL attention':v==='reporting'?'⚠ Sandaun: consistent late submission — pattern to address':'⚠ GRM resolution rate 84% — 6% below 90% target';
+}
+
+// ── DISBURSEMENTS ─────────────────────────────────────────────────────────
+function setDisbView(v,btn){
+  document.querySelectorAll('#pg-disb .mtog').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(v==='year'){
+    if(ci['c-disb'])ci['c-disb'].destroy();
+    ci['c-disb']=new Chart(document.getElementById('c-disb'),{type:'line',data:{labels:['FY2025','FY2026','FY2027 (plan)','FY2028 (plan)'],datasets:[
+      {label:'Cumulative disbursed (US$M)',data:[0,6,32,78],borderColor:'#2E75B6',backgroundColor:'rgba(46,117,182,0.1)',tension:.35,fill:true,pointRadius:5},
+      {label:'Projected trajectory (US$M)',data:[0,8,38,90],borderColor:'#94a3b8',backgroundColor:'transparent',tension:.35,borderDash:[5,4],pointRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>'$'+v+'M'},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+    document.getElementById('disb-insight').className='mgmt-insight mi-info';
+    document.getElementById('disb-insight').textContent='→ At current pace: 80% disbursed by FY2028 — on track for Phase 1 close';
+  } else {
+    if(ci['c-disb'])ci['c-disb'].destroy();
+    ci['c-disb']=new Chart(document.getElementById('c-disb'),{type:'bar',data:{labels:['C1: ECE','C2: Teachers+TLM','C3: Infra+ICT','C4: M&E'],datasets:[
+      {label:'FY26 plan ($M)',data:[.8,4.2,1.5,.5],backgroundColor:'rgba(46,117,182,0.3)',borderRadius:3},
+      {label:'FY26 actual ($M)',data:[.6,3.8,1.2,.4],backgroundColor:'#2E75B6',borderRadius:3},
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:{font:{size:9},callback:v=>'$'+v+'M'},grid:{color:'#f1f5f9'}},x:{ticks:{font:{size:9}},grid:{display:false}}}}});
+    document.getElementById('disb-insight').className='mgmt-insight mi-info';
+    document.getElementById('disb-insight').textContent='→ FY2026 disbursement rate: 86% of plan';
+  }
+}
+
 </script>
 </body>
 </html>
