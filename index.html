@@ -8,203 +8,47 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;min-height:100vh}
 
-/* HERO */
-.hero{background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%);padding:48px 24px 40px;text-align:center}
+.hero{background:linear-gradient(135deg,#1F3864 0%,#2E75B6 100%);padding:52px 24px 44px;text-align:center}
 .hero-tag{display:inline-block;background:rgba(255,255,255,0.15);color:#bfdbfe;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:0.06em;margin-bottom:16px}
-.hero h1{color:#fff;font-size:28px;font-weight:700;line-height:1.2;margin-bottom:10px}
+.hero h1{color:#fff;font-size:28px;font-weight:700;line-height:1.25;margin-bottom:10px}
 .hero h1 span{color:#fbbf24}
-.hero p{color:#93c5fd;font-size:13px;max-width:560px;margin:0 auto 20px;line-height:1.6}
-.hero-meta{display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap}
-.hmeta{display:flex;align-items:center;gap:6px;color:#bfdbfe;font-size:11px}
-.hmeta-dot{width:6px;height:6px;border-radius:50%;background:#fbbf24}
+.hero p{color:#93c5fd;font-size:13px;max-width:560px;margin:0 auto;line-height:1.6}
 
-/* CANDIDATE CARD */
-.candidate{background:#fff;border-radius:12px;padding:20px 24px;max-width:760px;margin:-20px auto 0;box-shadow:0 4px 24px rgba(31,56,100,0.12);position:relative;z-index:1}
-.cand-inner{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.cand-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#1F3864,#2E75B6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;font-weight:700;flex-shrink:0}
-.cand-info h2{font-size:15px;font-weight:700;color:#1F3864;margin-bottom:2px}
-.cand-info p{font-size:11px;color:#64748b;line-height:1.5}
-.cand-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.chip{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600}
-.chip-blue{background:#dbeafe;color:#1e40af}
-.chip-green{background:#dcfce7;color:#166534}
-.chip-amber{background:#fef9c3;color:#854d0e}
-
-/* CONTEXT */
-.context{max-width:760px;margin:28px auto 0;padding:0 16px}
-.ctx-card{background:#fff;border-radius:12px;padding:18px 22px;border-left:4px solid #fbbf24;margin-bottom:20px}
-.ctx-card h3{font-size:12px;font-weight:700;color:#78350f;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em}
-.ctx-card p{font-size:12px;color:#475569;line-height:1.6}
-
-/* SECTION */
-.section{max-width:760px;margin:0 auto 32px;padding:0 16px}
+.section{max-width:720px;margin:36px auto;padding:0 16px}
 .sec-title{font-size:13px;font-weight:700;color:#1F3864;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .sec-title::after{content:"";flex:1;height:1px;background:#e2e8f0}
 
-/* DEMO CARDS */
-.demo-grid{display:grid;gap:14px}
-.demo-card{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;transition:box-shadow 0.2s,transform 0.2s}
+.demo-card{background:#fff;border-radius:12px;overflow:hidden;border:1.5px solid #e2e8f0;transition:box-shadow 0.2s,transform 0.2s;margin-bottom:14px}
 .demo-card:hover{box-shadow:0 8px 32px rgba(31,56,100,0.12);transform:translateY(-2px)}
-.dc-top{padding:16px 20px;display:flex;align-items:flex-start;gap:14px}
-.dc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.dc-content{flex:1}
-.dc-content h3{font-size:13px;font-weight:700;color:#1F3864;margin-bottom:3px}
-.dc-content p{font-size:11px;color:#64748b;line-height:1.5}
-.dc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.dc-top{padding:18px 20px;display:flex;align-items:flex-start;gap:14px}
+.dc-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.dc-content h3{font-size:13px;font-weight:700;color:#1F3864;margin-bottom:4px}
+.dc-content p{font-size:11px;color:#64748b;line-height:1.6}
+.dc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
 .dc-tag{padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600;background:#f1f5f9;color:#475569}
-.dc-bottom{border-top:1px solid #f1f5f9;padding:11px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.dc-bottom{border-top:1px solid #f1f5f9;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .dc-bottom-left{font-size:10px;color:#94a3b8}
-.dc-btns{display:flex;gap:8px}
-.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:#1F3864;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;transition:background 0.15s}
+.btn-primary{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;background:#1F3864;color:#fff;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;transition:background 0.15s}
 .btn-primary:hover{background:#2E75B6}
-.btn-secondary{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:#fff;color:#1F3864;border:1.5px solid #1F3864;border-radius:8px;font-size:11px;font-weight:700;text-decoration:none;transition:all 0.15s}
-.btn-secondary:hover{background:#1F3864;color:#fff}
-.status-dot{width:7px;height:7px;border-radius:50%;background:#16a34a;display:inline-block;margin-right:4px}
-
-/* KOBO LINKS */
-.kobo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
-.kobo-card{background:#fff;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;text-decoration:none;transition:all 0.15s;display:block}
-.kobo-card:hover{border-color:#2E75B6;box-shadow:0 4px 16px rgba(46,117,182,0.1)}
-.kobo-card-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.kobo-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.kobo-card h4{font-size:11px;font-weight:700;color:#1F3864}
-.kobo-card p{font-size:10px;color:#64748b;line-height:1.4}
-.kobo-card .live-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:600;color:#166534;margin-top:5px}
-
-/* FOOTER */
-.footer{background:#1F3864;padding:24px;text-align:center;margin-top:40px}
-.footer p{color:#90afd4;font-size:11px;line-height:1.7}
-.footer strong{color:#fff}
-
-@media(max-width:600px){
-  .hero h1{font-size:22px}
-  .kobo-grid{grid-template-columns:1fr}
-  .cand-inner{flex-direction:column;align-items:flex-start}
-}
 </style>
 </head>
 <body>
 
 <div class="hero">
-  <div class="hero-tag">GEMS Application Portfolio · Papua New Guinea</div>
-  <h1>LEAP PNG — Digital M&amp;E<br><span>Demonstration Portfolio</span></h1>
-  <p>Interactive demonstrations of data collection, monitoring and visualisation tools built for the Learning Enhancement and Access Program (LEAP) — P505529, $150M IDA, Phase 1: 2025–2031</p>
-  <div class="hero-meta">
-    <div class="hmeta"><div class="hmeta-dot"></div>3 KoboToolbox / GEMS forms deployed</div>
-    <div class="hmeta"><div class="hmeta-dot"></div>Live ArcGIS portfolio map</div>
-    <div class="hmeta"><div class="hmeta-dot"></div>MIS dashboard simulation</div>
-    <div class="hmeta"><div class="hmeta-dot"></div>TLM Track &amp; Trace simulation</div>
-  </div>
-</div>
-
-<div class="candidate">
-  <div class="cand-inner">
-    <div class="cand-avatar">AG</div>
-    <div class="cand-info">
-      <h2>Agatha Mutheu Gikunda</h2>
-      <p>Senior Advisor · Digital Governance, Data Systems &amp; Technology Strategy<br>
-      Application: Digital M&amp;E Specialist — GEMS, World Bank Haiti CMU</p>
-      <div class="cand-chips">
-        <span class="chip chip-blue">KoboToolbox / GEMS</span>
-        <span class="chip chip-blue">ArcGIS Online</span>
-        <span class="chip chip-blue">Power BI</span>
-        <span class="chip chip-green">PNG LEAP — P505529</span>
-        <span class="chip chip-amber">World Bank consultant</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="context" style="margin-top:28px">
-  <div class="ctx-card">
-    <h3>About this portfolio</h3>
-    <p>These tools were developed to demonstrate hands-on technical readiness for the GEMS Digital M&amp;E Specialist role. All three KoboToolbox forms are live and deployable. The MIS dashboard, TLM Track &amp; Trace, and GEMS field form simulations illustrate the full data collection pipeline — from field submission to management dashboard. The Papua New Guinea context reflects real programme experience on the LEAP project (P505529).</p>
-  </div>
+  <div class="hero-tag">Papua New Guinea · P505529</div>
+  <h1>LEAP PNG — Digital M&amp;E<br><span>Demo Portfolio</span></h1>
+  <p>Interactive demonstrations of the monitoring and data collection system for the Learning Enhancement and Access Program — $150M IDA · Phase 1: 2025–2031 · 8 target provinces</p>
 </div>
 
 <div class="section">
-  <div class="sec-title">&#127775; Live deployable tools</div>
+  <div class="sec-title">Interactive simulations</div>
 
-  <!-- KOBO FORMS -->
-  <div class="demo-card" style="margin-bottom:14px">
-    <div class="dc-top">
-      <div class="dc-icon" style="background:#dbeafe">&#128203;</div>
-      <div class="dc-content">
-        <h3>KoboToolbox — GEMS Data Collection Forms</h3>
-        <p>Three bilingual (English/French) forms deployed on kf.kobotoolbox.org. Each form features GPS auto-capture, photo upload, skip logic, calculated fields, and offline capability. Click any form below to open it on any device including mobile.</p>
-        <div class="dc-tags">
-          <span class="dc-tag">KoboToolbox</span>
-          <span class="dc-tag">XLSForm</span>
-          <span class="dc-tag">Bilingual EN/FR</span>
-          <span class="dc-tag">GPS + photo</span>
-          <span class="dc-tag">Offline capable</span>
-        </div>
-      </div>
-    </div>
-    <div style="padding:0 20px 14px">
-      <div class="kobo-grid">
-        <a href="https://ee.kobotoolbox.org/x/OtPKPhCK" target="_blank" class="kobo-card">
-          <div class="kobo-card-top">
-            <div class="kobo-icon" style="background:#dbeafe">&#127979;</div>
-            <h4>Education (PSUGO)<br>School Monitoring</h4>
-          </div>
-          <p>School infrastructure verification, enrollment, attendance tracking across Nord &amp; Artibonite</p>
-          <div class="live-badge"><span class="status-dot"></span>Live — click to open</div>
-        </a>
-        <a href="https://ee.kobotoolbox.org/x/3sj0e7Bd" target="_blank" class="kobo-card">
-          <div class="kobo-card-top">
-            <div class="kobo-icon" style="background:#dcfce7">&#128700;</div>
-            <h4>WASH (PRODEPUR)<br>Water Point Verification</h4>
-          </div>
-          <p>Water point field verification with GPS, repeat groups, and auto-calculated population served</p>
-          <div class="live-badge"><span class="status-dot"></span>Live — click to open</div>
-        </a>
-        <a href="https://ee.kobotoolbox.org/x/69wFwKa8" target="_blank" class="kobo-card">
-          <div class="kobo-card-top">
-            <div class="kobo-icon" style="background:#fef9c3">&#128106;</div>
-            <h4>Social Protection (PPT)<br>Beneficiary Visit</h4>
-          </div>
-          <p>Household registration, conditionality verification, nutrition status and vulnerability assessment</p>
-          <div class="live-badge"><span class="status-dot"></span>Live — click to open</div>
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ARCGIS MAP -->
-  <div class="demo-card" style="margin-bottom:14px">
-    <div class="dc-top">
-      <div class="dc-icon" style="background:#dcfce7">&#127758;</div>
-      <div class="dc-content">
-        <h3>ArcGIS Online — Haiti GEMS Portfolio Map</h3>
-        <p>Interactive public web map showing GPS-tagged project sites across Nord, Artibonite and Nord-Ouest departments. Three layers — Education, WASH, and Social Protection — each styled by performance status (Complete / In Progress / Not Started). Hover any marker for school or water point details.</p>
-        <div class="dc-tags">
-          <span class="dc-tag">ArcGIS Online</span>
-          <span class="dc-tag">3 project layers</span>
-          <span class="dc-tag">GPS-tagged sites</span>
-          <span class="dc-tag">Public link</span>
-        </div>
-      </div>
-    </div>
-    <div class="dc-bottom">
-      <div class="dc-bottom-left"><span class="status-dot"></span>Live public map · opens in browser</div>
-      <div class="dc-btns">
-        <a href="https://arcg.is/1X5qay2" target="_blank" class="btn-primary">&#127758; Open map</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="section">
-  <div class="sec-title">&#128187; Interactive simulations</div>
-
-  <!-- MIS DASHBOARD -->
-  <div class="demo-card" style="margin-bottom:14px">
+  <div class="demo-card">
     <div class="dc-top">
       <div class="dc-icon" style="background:#ede9fe">&#128202;</div>
       <div class="dc-content">
         <h3>LEAP PNG — Management Information System Dashboard</h3>
-        <p>Full MIS dashboard covering all 4 project components and PDO indicators across 8 target provinces. Built around the LEAP PNG Results Framework (P505529). Includes a management priority section for the three hot topics: TLM distribution, classroom construction, and ICT hub refurbishment — each with a real PNG country map and province-level status tracking.</p>
+        <p>Full MIS dashboard covering all 4 project components and PDO indicators across 8 target provinces. Built around the LEAP PNG Results Framework. Includes a management priority section for the three hot topics — TLM distribution, classroom construction, and ICT hub refurbishment — each with a real PNG country map and province-level status tracking.</p>
         <div class="dc-tags">
           <span class="dc-tag">Results framework</span>
           <span class="dc-tag">4 components</span>
@@ -217,19 +61,16 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;min-height:100vh
     </div>
     <div class="dc-bottom">
       <div class="dc-bottom-left">6 tabs · PDO indicators · hot topics · province maps · RF tracker</div>
-      <div class="dc-btns">
-        <a href="LEAP_MIS_Full.html" target="_blank" class="btn-primary">&#128202; Open MIS dashboard</a>
-      </div>
+      <a href="LEAP_MIS_Full.html" target="_blank" class="btn-primary">&#128202; Open MIS dashboard</a>
     </div>
   </div>
 
-  <!-- DATA COLLECTION DEMO -->
   <div class="demo-card">
     <div class="dc-top">
       <div class="dc-icon" style="background:#fef9c3">&#128230;</div>
       <div class="dc-content">
         <h3>Data Collection Pipeline — How Data Enters the MIS</h3>
-        <p>Three-tab simulation answering the question: <em>How was this data collected?</em> Demonstrates the full pipeline from field to dashboard across three tools: Bluetree Track &amp; Trace for TLM distribution (with interactive carton scan interface), GEMS field forms for classroom construction verification (GPS-tagged photos, works checklist), and GEMS multi-contractor ICT hub refurbishment forms (5 contractors, one visit).</p>
+        <p>Three-tab simulation answering the question: <em>How was this data collected?</em> Demonstrates the full pipeline from field to dashboard — Bluetree Track &amp; Trace for TLM distribution with interactive carton scan interface, GEMS field forms for classroom construction verification, and GEMS multi-contractor ICT hub refurbishment forms covering 5 separate contractors in one visit.</p>
         <div class="dc-tags">
           <span class="dc-tag">Bluetree T&amp;T</span>
           <span class="dc-tag">Chain of custody</span>
@@ -243,19 +84,10 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#f0f4f8;min-height:100vh
     </div>
     <div class="dc-bottom">
       <div class="dc-bottom-left">3 tabs · TLM T&amp;T · classroom construction · ICT hub · scan interface</div>
-      <div class="dc-btns">
-        <a href="LEAP_DataCollection_Final.html" target="_blank" class="btn-primary">&#128230; Open data collection demo</a>
-      </div>
+      <a href="LEAP_DataCollection_Final.html" target="_blank" class="btn-primary">&#128230; Open data collection demo</a>
     </div>
   </div>
-</div>
 
-<div class="footer">
-  <p>
-    <strong>Agatha Mutheu Gikunda</strong> · agatha.mutheu@gmail.com · +254 728 608 110<br>
-    Developed as part of the application for Digital M&amp;E Specialist — GEMS, World Bank Haiti CMU<br>
-    All KoboToolbox forms are live and deployable · ArcGIS map is publicly accessible · Simulations run entirely in the browser
-  </p>
 </div>
 
 </body>
