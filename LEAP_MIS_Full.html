@@ -692,8 +692,6 @@ function buildAllCharts(){
   mkC('c-ttrend',{type:'line',data:{labels:Q,datasets:[{label:'Total trained',data:[320,1240,2870],borderColor:'#16a34a',backgroundColor:'rgba(22,163,74,0.1)',tension:.35,fill:true,pointRadius:4},{label:'Female trained',data:[122,496,1177],borderColor:'#34d399',backgroundColor:'rgba(52,211,153,0.07)',tension:.35,fill:true,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
   mkC('c-obs',{type:'bar',data:{labels:PSHORT,datasets:[{label:'Pre-training avg',data:[38,41,36,43,39,42,37,35],backgroundColor:'rgba(22,163,74,0.3)',borderRadius:2},{label:'Post-training avg',data:[62,66,58,69,64,67,60,56],backgroundColor:'#16a34a',borderRadius:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,max:100,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
   barChart('c-tlm-bar',DATA.tlm);
-  barChart('c-infra-bar',DATA.infra);
-  barChart('c-ict-bar',DATA.ict);
   mkC('c-pdo',{type:'line',data:{labels:['Baseline','Q3 2025','Q4 2025','Q1 2026'],datasets:[{label:'PDO1: teachers (%)',data:[0,8.2,18.5,31.4],borderColor:'#2a78d6',tension:.35,pointRadius:4},{label:'PDO3: reading (%)',data:[65,65,65,66.8],borderColor:'#eb6834',tension:.35,pointRadius:4},{label:'PDO4: math (%)',data:[77,77,77,78.2],borderColor:'#6250d6',tension:.35,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:5}}},scales:{y:{beginAtZero:false,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
   mkC('c-grm',{type:'bar',data:{labels:Q,datasets:[{label:'Received',data:[8,12,21],backgroundColor:'rgba(219,39,119,0.3)',borderRadius:3},{label:'Resolved',data:[8,11,18],backgroundColor:'#db2777',borderRadius:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:6}}},scales:{y:{beginAtZero:true,ticks:yt,grid:g},x:{ticks:xt,grid:{display:false}}}}});
   mkC('c-prov',{type:'bar',data:{labels:PSHORT,datasets:[{label:'On track',data:[5,4,3,6,4,5,3,4],backgroundColor:'#0ca30c',stack:'s'},{label:'At risk',data:[2,2,3,1,2,2,3,2],backgroundColor:'#fab219',stack:'s'},{label:'Off track',data:[1,2,2,1,2,1,2,2],backgroundColor:'#d03b3b',stack:'s'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{size:9},boxWidth:10,padding:5}}},scales:{y:{beginAtZero:true,stacked:true,ticks:yt,grid:g},x:{stacked:true,ticks:xt,grid:{display:false}}}}});
@@ -776,7 +774,7 @@ function buildHtOverview(){
 const tabMaps={
   ece:()=>{if(!mapBuilt.ece){buildMap('ms-ece','ml-ece',DATA.ece);mapBuilt.ece=true;}},
   teacher:()=>{if(!mapBuilt.tlm){buildMap('ms-tlm','ml-tlm',DATA.tlm);mapBuilt.tlm=true;}miniTable('tbl-tlm-mini',DATA.tlm,'schools');},
-  infra:()=>{if(!mapBuilt.infra){buildMap('ms-infra','ml-infra',DATA.infra);buildMap('ms-ict','ml-ict',DATA.ict);mapBuilt.infra=true;}miniTable('tbl-infra-mini',DATA.infra,'schools');miniTable('tbl-ict-mini',DATA.ict,'hubs');},
+  infra:()=>{if(!mapBuilt.infra){buildMap('ms-infra','ml-infra',DATA.infra);buildMap('ms-ict','ml-ict',DATA.ict);mapBuilt.infra=true;}const _icv=document.getElementById('ict-chart-view'),_icc=document.getElementById('ict-contractor-view');if(_icv)_icv.style.display='block';if(_icc)_icc.style.display='none';document.querySelectorAll('#pg-infra .mtog').forEach((b,i)=>b.classList.toggle('on',i===0));miniTable('tbl-infra-mini',DATA.infra,'schools');miniTable('tbl-ict-mini',DATA.ict,'hubs');barChart('c-infra-bar',DATA.infra);barChart('c-ict-bar',DATA.ict);},
 };
 
 document.querySelector('.nav').addEventListener('click',function(e){
@@ -785,7 +783,7 @@ document.querySelector('.nav').addEventListener('click',function(e){
   tab.classList.add('on');
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.getElementById('pg-'+tab.dataset.tab).classList.add('on');
-  const fn=tabMaps[tab.dataset.tab];if(fn)fn();
+  const fn=tabMaps[tab.dataset.tab];try{if(fn)fn();}catch(e){console.error('tabMap error:',e);}
   buildAllCharts();
 });
 
