@@ -163,6 +163,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
   <div class="ntab" data-tab="infra">C3 — Infrastructure &amp; ICT</div>
   <div class="ntab" data-tab="me">C4 — M&amp;E</div>
   <div class="ntab" data-tab="disb">Disbursements</div>
+  <div class="ntab" data-tab="school">🏫 School profile</div>
 </div>
 <div class="src-bar">
   <div class="src-item"><div class="src-dot" style="background:#60a5fa"></div>TLM: Bluetree Track &amp; Trace</div>
@@ -558,6 +559,75 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
     <div class="cc"><div class="ct">Planned vs actual disbursements by component (US$M)</div><div style="position:relative;height:210px"><canvas id="c-disb" role="img" aria-label="Disbursements">Disbursements.</canvas></div></div>
   </div>
 </div>
+
+<!-- ═══════════════ SCHOOL PROFILE ═══════════════ -->
+<div class="pg" id="pg-school">
+  <div class="sec" style="display:none"></div>
+  <div style="background:#f0f6ff;border:2px solid #2E75B6;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+    <div style="font-size:12px;font-weight:700;color:#1F3864;margin-bottom:10px">🔍 Search by school name or school code</div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <input id="sp-search" type="text" placeholder="Type school name, code or province (e.g. PNG-WH-0012)…"
+        style="flex:1;min-width:220px;font-size:12px;padding:7px 12px;border:1.5px solid #93c5fd;border-radius:8px;font-family:inherit;color:#1e293b;outline:none"
+        oninput="spFilter(this.value)">
+      <select id="sp-sel" onchange="spLoad(this.value)"
+        style="font-size:11px;padding:7px 10px;border:1.5px solid #93c5fd;border-radius:8px;background:#fff;font-family:inherit;color:#1e293b;min-width:200px">
+        <option value="">— Select school —</option>
+      </select>
+    </div>
+    <div style="font-size:9px;color:#64748b;margin-top:6px">📌 School code is the common identifier across all LEAP KoboToolbox forms — TLM delivery, teacher training, infrastructure grant and ECE status all link here.</div>
+  </div>
+  <div id="sp-none" style="text-align:center;padding:40px;color:#94a3b8">
+    <div style="font-size:48px;margin-bottom:10px">🏫</div>
+    <p style="font-size:12px">Select a school above to see its full profile across all LEAP components.</p>
+    <p style="font-size:10px;margin-top:6px;color:#cbd5e1">C1 ECE · C2 Teacher training · C2 TLM · C3 Infrastructure · C3 ICT</p>
+  </div>
+  <div id="sp-profile" style="display:none">
+    <div style="background:linear-gradient(135deg,#1F3864,#2E75B6);border-radius:10px;padding:14px 18px;color:#fff;margin-bottom:14px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div id="sp-name" style="font-size:16px;font-weight:700">—</div>
+        <div id="sp-code" style="font-family:monospace;font-size:12px;color:#90b8e0;margin-top:3px">—</div>
+        <div id="sp-meta" style="font-size:10px;color:#90b8e0;margin-top:4px">—</div>
+      </div>
+      <div id="sp-agg" style="display:flex;gap:12px;flex-wrap:wrap"></div>
+    </div>
+    <div id="sp-fresh" style="font-size:10px;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0;border-radius:7px;padding:7px 12px;margin-bottom:12px;display:flex;gap:14px;flex-wrap:wrap"></div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:14px">
+      <!-- TLM -->
+      <div id="sp-card-tlm" style="border-radius:10px;padding:14px;border:2px solid #fde68a;background:#fffbeb">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#92400e">📦 C2 — TLM delivery</div>
+          <span id="sp-tlm-st" style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">—</span>
+        </div>
+        <div id="sp-tlm-body"></div>
+      </div>
+      <!-- TEACHER -->
+      <div id="sp-card-teacher" style="border-radius:10px;padding:14px;border:2px solid #86efac;background:#f0fdf4">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#166534">👩‍🏫 C2 — Teacher training</div>
+          <span id="sp-teacher-st" style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">—</span>
+        </div>
+        <div id="sp-teacher-body"></div>
+      </div>
+      <!-- INFRA -->
+      <div id="sp-card-infra" style="border-radius:10px;padding:14px;border:2px solid #93c5fd;background:#eff6ff">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#1e40af">🏗️ C3 — Infrastructure grant</div>
+          <span id="sp-infra-st" style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">—</span>
+        </div>
+        <div id="sp-infra-body"></div>
+      </div>
+      <!-- ECE -->
+      <div id="sp-card-ece" style="border-radius:10px;padding:14px;border:2px solid #c4b5fd;background:#faf5ff">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:#4c1d95">🌱 C1 — ECE centre</div>
+          <span id="sp-ece-st" style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:20px">—</span>
+        </div>
+        <div id="sp-ece-body"></div>
+      </div>
+    </div>
+    <div id="sp-updated" style="font-size:9px;color:#94a3b8;text-align:right;margin-top:10px"></div>
+  </div>
+</div><!-- /pg-school -->
 
 </div><!-- body -->
 </div><!-- wrap -->
@@ -1011,6 +1081,300 @@ function setDisbView(v,btn){
     document.getElementById('disb-insight').textContent='→ FY2026 disbursement rate: 86% of plan';
   }
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SCHOOL PROFILE — cross-component view, joined on school code
+// ═══════════════════════════════════════════════════════════════
+
+const SP_DB = [
+  {
+    code:'PNG-WH-0012', name:'Hagen Park Primary School', prov:'Western Highlands', district:'Hagen', type:'Primary (Prep–6)', enrol:487,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'08 Nov 2025',officer:'James Kama',notes:'All readers received and signed. Grade 7 not in scope this school.'},
+    teacher:{total:18,trained:18,pct:100,date:'15 Jan 2026',cohort:'Cohort 1',notes:'All teachers completed training. Post-survey score: 88%.'},
+    infra:{status:'complete',pct:100,grant:'PGK 48,000',disbursed:'01 Oct 2025',complete_date:'18 Dec 2025',officer:'Jacob Mara',items:['Classrooms re-roofed','Latrine block upgraded','Ramp installed','Solar lighting installed'],notes:'Works verified complete. Photos submitted. Grant cleared.'},
+    ece:{has_ece:true,status:'complete',mos:6,sub_grant:'PGK 15,000',centre_name:'Hagen Park ECE Centre',enrol:34,notes:'All 6 MOS standards met. Centre fully operational.'}
+  },
+  {
+    code:'PNG-WH-0031', name:'Minj Secondary School', prov:'Western Highlands', district:'Jiwaka', type:'Secondary (7–12)', enrol:620,
+    tlm:{gr3:false,gr5:false,gr7:true,confirmed:true,date:'10 Nov 2025',officer:'James Kama',notes:'Grade 7 readers delivered. Grades 3 & 5 not in scope (secondary only).'},
+    teacher:{total:24,trained:20,pct:83,date:'20 Jan 2026',cohort:'Cohort 1',notes:'4 teachers missed cohort 1 — enrolled in cohort 3 (Apr 2026).'},
+    infra:{status:'not_started',pct:0,grant:'PGK 52,000',disbursed:'15 Nov 2025',complete_date:null,officer:'Jacob Mara',items:[],notes:'Contractor not mobilised 90+ days after grant disbursed. PDoE escalation issued 14 Mar 2026.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Secondary school — ECE not applicable.'}
+  },
+  {
+    code:'PNG-EN-0008', name:'Wabag Primary School', prov:'Enga', district:'Wabag', type:'Primary (Prep–6)', enrol:312,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'12 Nov 2025',officer:'Mary Polon',notes:'All in-scope readers received and signed off by head teacher.'},
+    teacher:{total:12,trained:12,pct:100,date:'18 Jan 2026',cohort:'Cohort 1',notes:'All trained. Training quality score: 91%.'},
+    infra:{status:'complete',pct:100,grant:'PGK 41,000',disbursed:'05 Oct 2025',complete_date:'10 Jan 2026',officer:'Paul Yama',items:['Two classrooms re-roofed','WASH block constructed','Disability ramp installed'],notes:'All works verified. KoboToolbox form submitted with 6 geo-tagged photos.'},
+    ece:{has_ece:true,status:'in_progress',mos:4,sub_grant:'PGK 12,000',centre_name:'Wabag ECE Centre',enrol:28,notes:'4/6 MOS met. Nutrition & infrastructure standards pending — sub-grant activities underway.'}
+  },
+  {
+    code:'PNG-EN-0019', name:'Kompiam Primary School', prov:'Enga', district:'Kompiam-Ambum', type:'Primary (Prep–6)', enrol:195,
+    tlm:{gr3:true,gr5:false,gr7:false,confirmed:false,date:null,officer:'Mary Polon',notes:'Grade 3 readers at district office — road access delay preventing delivery. Grade 5 not yet dispatched.'},
+    teacher:{total:8,trained:4,pct:50,date:'25 Jan 2026',cohort:'Cohort 2',notes:'4 teachers in cohort 2. Remaining 4 scheduled for cohort 3 — remote location.'},
+    infra:{status:'not_started',pct:0,grant:'PGK 38,000',disbursed:'20 Nov 2025',complete_date:null,officer:'Paul Yama',items:[],notes:'Materials procurement dispute with BoM. PDoE mediation scheduled.'},
+    ece:{has_ece:true,status:'not_started',mos:0,sub_grant:null,centre_name:'Kompiam ECE (proposed)',enrol:null,notes:'Sub-grant not yet disbursed. MOS baseline to be completed.'}
+  },
+  {
+    code:'PNG-EH-0005', name:'Kainantu Primary School', prov:'Eastern Highlands', district:'Kainantu', type:'Primary (Prep–6)', enrol:428,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:false,date:null,officer:'K. Kopen',notes:'Partial delivery — 3 cartons Grade 5 readers missing. Replacement dispatched 15 Mar 2026.'},
+    teacher:{total:16,trained:14,pct:88,date:'22 Jan 2026',cohort:'Cohort 1',notes:'2 teachers yet to complete training. Scheduled cohort 3.'},
+    infra:{status:'complete',pct:100,grant:'PGK 44,000',disbursed:'08 Oct 2025',complete_date:'20 Dec 2025',officer:'Steven Laho',items:['Roof replacement','WASH upgrade','Latrine constructed'],notes:'Works complete. Final inspection passed.'},
+    ece:{has_ece:true,status:'complete',mos:5,sub_grant:'PGK 14,000',centre_name:'Kainantu ECE Centre',enrol:41,notes:'5/6 MOS met. Nutrition standard remediation plan in place.'}
+  },
+  {
+    code:'PNG-EH-0022', name:'Obura Secondary School', prov:'Eastern Highlands', district:'Obura-Wonenara', type:'Secondary (7–12)', enrol:280,
+    tlm:{gr3:false,gr5:false,gr7:true,confirmed:false,date:null,officer:'K. Kopen',notes:'Delivery not yet made — remote district. Access road seasonal closure.'},
+    teacher:{total:11,trained:7,pct:64,date:'28 Jan 2026',cohort:'Cohort 2',notes:'4 remaining teachers to complete cohort 3. Forecast: April 2026.'},
+    infra:{status:'in_progress',pct:55,grant:'PGK 47,000',disbursed:'10 Oct 2025',complete_date:null,officer:'Steven Laho',items:['Roof 50% complete','WASH pending','Ramp not started'],notes:'Works behind schedule. Wet season access impacted materials delivery.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Secondary school — ECE not applicable.'}
+  },
+  {
+    code:'PNG-SD-0003', name:'Vanimo Primary School', prov:'Sandaun', district:'Vanimo-Green River', type:'Primary (Prep–6)', enrol:361,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:false,date:null,officer:'Peter Wasi',notes:'Delivery scheduled 20 Mar 2026. Books held at Vanimo warehouse.'},
+    teacher:{total:14,trained:9,pct:64,date:'01 Feb 2026',cohort:'Cohort 2',notes:'Training significantly disrupted by province staffing issues. 5 remaining.'},
+    infra:{status:'complete',pct:100,grant:'PGK 39,000',disbursed:'01 Nov 2025',complete_date:'28 Jan 2026',officer:'Ruth Palin',items:['Classroom refurbishment','Latrine upgrade','Solar panel installed'],notes:'Works complete — fastest completion in Sandaun province.'},
+    ece:{has_ece:true,status:'in_progress',mos:3,sub_grant:'PGK 11,000',centre_name:'Vanimo ECE',enrol:22,notes:'3/6 MOS. Infrastructure and safeguarding standards still to be met.'}
+  },
+  {
+    code:'PNG-SD-0014', name:'Telefomin Community School', prov:'Sandaun', district:'Telefomin', type:'Community (Prep–8)', enrol:118,
+    tlm:{gr3:false,gr5:false,gr7:false,confirmed:false,date:null,officer:'Peter Wasi',notes:'Road access — helicopter delivery required. Flight planned pending weather clearance.'},
+    teacher:{total:5,trained:2,pct:40,date:null,officer:'Peter Wasi',notes:'Remote school. Training cohort attendance extremely difficult. 3 teachers pending remote module.'},
+    infra:{status:'not_started',pct:0,grant:'PGK 31,000',disbursed:'01 Dec 2025',complete_date:null,officer:'Ruth Palin',items:[],notes:'Access road impassable seasonally. No contractor mobilised. High-priority monitoring case.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Community school — ECE centre proposed for FY2027 when infrastructure works complete.'}
+  },
+  {
+    code:'PNG-MD-0007', name:'Madang Primary School', prov:'Madang', district:'Madang', type:'Primary (Prep–6)', enrol:534,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'06 Nov 2025',officer:'B. Kal',notes:'All readers received. School confirmed via Bluetree QR scan.'},
+    teacher:{total:21,trained:21,pct:100,date:'10 Jan 2026',cohort:'Cohort 1',notes:'Province with fastest training completion. All teachers certified.'},
+    infra:{status:'complete',pct:100,grant:'PGK 53,000',disbursed:'01 Oct 2025',complete_date:'05 Dec 2025',officer:'Ben Loi',items:['Roof','WASH block','Ramp','Solar','Classroom paint'],notes:'Model school — visited by DoE inspection team Dec 2025.'},
+    ece:{has_ece:true,status:'complete',mos:6,sub_grant:'PGK 16,000',centre_name:'Madang Primary ECE',enrol:49,notes:'All 6 MOS standards achieved. Highest MOS score in Madang.'}
+  },
+  {
+    code:'PNG-MD-0024', name:'Bogia Secondary School', prov:'Madang', district:'Bogia', type:'Secondary (7–12)', enrol:290,
+    tlm:{gr3:false,gr5:false,gr7:true,confirmed:true,date:'08 Nov 2025',officer:'B. Kal',notes:'Grade 7 readers confirmed. School receipt signed.'},
+    teacher:{total:13,trained:13,pct:100,date:'14 Jan 2026',cohort:'Cohort 1',notes:'All trained. Post-survey avg: 86%.'},
+    infra:{status:'complete',pct:100,grant:'PGK 42,000',disbursed:'03 Oct 2025',complete_date:'18 Dec 2025',officer:'Ben Loi',items:['Classrooms re-roofed','Science lab door/windows','Ramp installed'],notes:'Works complete and verified.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Secondary school — ECE not applicable.'}
+  },
+  {
+    code:'PNG-MR-0011', name:'Lae Primary School', prov:'Morobe', district:'Lae', type:'Primary (Prep–6)', enrol:618,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'11 Nov 2025',officer:'Grace Timi',notes:'Full delivery confirmed. 2 cartons damaged in transit — replacements delivered 20 Nov.'},
+    teacher:{total:24,trained:19,pct:79,date:'25 Jan 2026',cohort:'Cohort 2',notes:'5 teachers completing module 4. Expected finish end-March.'},
+    infra:{status:'complete',pct:100,grant:'PGK 55,000',disbursed:'06 Oct 2025',complete_date:'22 Dec 2025',officer:'Tony Tenge',items:['Roofing (4 classrooms)','WASH block constructed','Disability access ramp','External painting'],notes:'Works verified. Photos submitted with GPS stamps.'},
+    ece:{has_ece:true,status:'in_progress',mos:4,sub_grant:'PGK 15,000',centre_name:'Lae Primary ECE',enrol:38,notes:'4/6 MOS. Feeding and safeguarding pending budget approval.'}
+  },
+  {
+    code:'PNG-MR-0028', name:'Bumayong Primary School', prov:'Morobe', district:'Lae', type:'Primary (Prep–6)', enrol:388,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:false,date:null,officer:'Grace Timi',notes:'Wrong materials delivered — Grade 3 readers for different language cluster. Replacement dispatched 18 Mar 2026.'},
+    teacher:{total:15,trained:11,pct:73,date:'29 Jan 2026',cohort:'Cohort 2',notes:'4 teachers in cohort 3. Province cohort 3 scheduled May 2026.'},
+    infra:{status:'in_progress',pct:70,grant:'PGK 44,000',disbursed:'08 Oct 2025',complete_date:null,officer:'Tony Tenge',items:['Roof complete','WASH in progress','Ramp pending'],notes:'Works 70% complete. Contractor on site. Final inspection target: April 2026.'},
+    ece:{has_ece:true,status:'in_progress',mos:3,sub_grant:'PGK 12,000',centre_name:'Bumayong ECE',enrol:31,notes:'3/6 MOS. Infrastructure standard not yet met — works ongoing.'}
+  },
+  {
+    code:'PNG-CN-0004', name:'Konedobu Primary School', prov:'Central', district:'Moresby South', type:'Primary (Prep–6)', enrol:449,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'09 Nov 2025',officer:'Tom Naime',notes:'All readers received. QR scan confirmed.'},
+    teacher:{total:17,trained:17,pct:100,date:'12 Jan 2026',cohort:'Cohort 1',notes:'Province cohort 1 — all teachers trained. Score: 84%.'},
+    infra:{status:'in_progress',pct:40,grant:'PGK 46,000',disbursed:'10 Nov 2025',complete_date:null,officer:'Rita Koke',items:['Roof works started','WASH not started','Ramp not started'],notes:'Works behind schedule. Wet season delays cited by contractor.'},
+    ece:{has_ece:true,status:'complete',mos:5,sub_grant:'PGK 14,000',centre_name:'Konedobu ECE Centre',enrol:36,notes:'5/6 MOS. Nutrition standard to be addressed in next review period.'}
+  },
+  {
+    code:'PNG-CN-0019', name:'Goilala Primary School', prov:'Central', district:'Goilala', type:'Primary (Prep–6)', enrol:142,
+    tlm:{gr3:true,gr5:false,gr7:false,confirmed:false,date:null,officer:'Tom Naime',notes:'Grade 3 at district hub — road access highly seasonal. Grade 5 pending dispatch.'},
+    teacher:{total:6,trained:3,pct:50,date:null,officer:'Tom Naime',notes:'Extremely remote. Training access difficult. 3 teachers completed online module.'},
+    infra:{status:'not_started',pct:0,grant:'PGK 44,000',disbursed:'10 Nov 2025',complete_date:null,officer:'Rita Koke',items:[],notes:'Land dispute halting construction site access. Legal process underway.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'No ECE centre at this location. Proposed for Phase 2.'}
+  },
+  {
+    code:'PNG-BV-0006', name:'Arawa Primary School', prov:'Bougainville', district:'Central Bougainville', type:'Primary (Prep–6)', enrol:376,
+    tlm:{gr3:false,gr5:false,gr7:false,confirmed:false,date:null,officer:'Anna Siriosi',notes:'Province TLM distribution not yet commenced for most schools. Priority uplift planned April 2026.'},
+    teacher:{total:14,trained:4,pct:29,date:'05 Feb 2026',cohort:'Cohort 2',notes:'Province training significantly behind. Access and staffing constraints. PDoE intervention planned.'},
+    infra:{status:'in_progress',pct:30,grant:'PGK 62,000',disbursed:'05 Dec 2025',complete_date:null,officer:'John Meori',items:['Foundation works only'],notes:'Works commenced but contractor access irregular. Bougainville provincial authority coordinating.'},
+    ece:{has_ece:true,status:'not_started',mos:0,sub_grant:null,centre_name:'Arawa ECE (proposed)',enrol:null,notes:'Sub-grant not disbursed. Province ECE rollout at risk of delay.'}
+  },
+  {
+    code:'PNG-BV-0022', name:'Buka Secondary School', prov:'Bougainville', district:'North Bougainville', type:'Secondary (7–12)', enrol:490,
+    tlm:{gr3:false,gr5:false,gr7:false,confirmed:false,date:null,officer:'Anna Siriosi',notes:'Grade 7 readers allocated but distribution not commenced. Province logistics being resolved.'},
+    teacher:{total:19,trained:5,pct:26,date:'10 Feb 2026',cohort:'Cohort 2',notes:'Most teachers unable to attend provincial cohort. Remote delivery module being tested.'},
+    infra:{status:'not_started',pct:0,grant:null,disbursed:null,complete_date:null,officer:'John Meori',items:[],notes:'School not yet included in infrastructure grant cycle. Assessment visit planned June 2026.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Secondary school — ECE not applicable.'}
+  },
+  {
+    code:'PNG-WH-0044', name:'Mul Primary School', prov:'Western Highlands', district:'Mul-Baiyer', type:'Primary (Prep–6)', enrol:267,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'07 Nov 2025',officer:'James Kama',notes:'Confirmed. School receipt signed by head teacher.'},
+    teacher:{total:10,trained:10,pct:100,date:'16 Jan 2026',cohort:'Cohort 1',notes:'All teachers completed training. Highest cohort 1 score in province: 93%.'},
+    infra:{status:'complete',pct:100,grant:'PGK 37,000',disbursed:'03 Oct 2025',complete_date:'10 Dec 2025',officer:'Jacob Mara',items:['Roof replacement','Latrine upgrade','Ramp installed'],notes:'Works complete. All checklist items verified.'},
+    ece:{has_ece:true,status:'complete',mos:6,sub_grant:'PGK 13,000',centre_name:'Mul ECE',enrol:29,notes:'All MOS met. Best-practice ECE centre — visited by DoE team.'}
+  },
+  {
+    code:'PNG-MR-0049', name:'Nawaeb Secondary School', prov:'Morobe', district:'Nawaeb', type:'Secondary (7–12)', enrol:340,
+    tlm:{gr3:false,gr5:false,gr7:false,confirmed:false,date:null,officer:'Grace Timi',notes:'SR-G7 not yet dispatched from Lae warehouse. Procurement issue — target 20 Mar now missed.'},
+    teacher:{total:13,trained:9,pct:69,date:'01 Feb 2026',cohort:'Cohort 2',notes:'4 teachers in cohort 3. Training quality flagged — cohort facilitator changed.'},
+    infra:{status:'in_progress',pct:55,grant:'PGK 48,000',disbursed:'10 Oct 2025',complete_date:null,officer:'Tony Tenge',items:['Roof 60% complete','WASH not started'],notes:'Works delayed — materials shortage. PDoE monitoring.'},
+    ece:{has_ece:false,status:null,mos:null,sub_grant:null,centre_name:null,enrol:null,notes:'Secondary school — ECE not applicable.'}
+  },
+  {
+    code:'PNG-EH-0038', name:'Goroka Primary School', prov:'Eastern Highlands', district:'Goroka', type:'Primary (Prep–6)', enrol:512,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'11 Nov 2025',officer:'K. Kopen',notes:'All in-scope readers confirmed received. Signed receipt on file.'},
+    teacher:{total:20,trained:18,pct:90,date:'24 Jan 2026',cohort:'Cohort 1',notes:'2 teachers completing final assessment. Near full completion.'},
+    infra:{status:'complete',pct:100,grant:'PGK 50,000',disbursed:'08 Oct 2025',complete_date:'28 Dec 2025',officer:'Steven Laho',items:['Two classrooms re-roofed','WASH upgraded','Ramp installed','Water tank'],notes:'Full works complete. Second school in province to reach completion.'},
+    ece:{has_ece:true,status:'complete',mos:5,sub_grant:'PGK 15,000',centre_name:'Goroka Primary ECE',enrol:44,notes:'5/6 MOS. Feeding standard action plan in progress.'}
+  },
+  {
+    code:'PNG-MD-0041', name:'Alexishafen Primary School', prov:'Madang', district:'Madang', type:'Primary (Prep–6)', enrol:294,
+    tlm:{gr3:true,gr5:true,gr7:false,confirmed:true,date:'06 Nov 2025',officer:'B. Kal',notes:'All readers confirmed. QR verified.'},
+    teacher:{total:11,trained:11,pct:100,date:'11 Jan 2026',cohort:'Cohort 1',notes:'All trained. Province leader school for cohort 1 rollout.'},
+    infra:{status:'complete',pct:100,grant:'PGK 38,000',disbursed:'01 Oct 2025',complete_date:'08 Dec 2025',officer:'Ben Loi',items:['Roof','Latrine','Ramp','Solar'],notes:'Works complete ahead of schedule.'},
+    ece:{has_ece:true,status:'complete',mos:6,sub_grant:'PGK 13,000',centre_name:'Alexishafen ECE',enrol:32,notes:'All 6 MOS standards achieved.'}
+  }
+];
+
+function spPctColor(p){return p>=90?'#16a34a':p>=60?'#d97706':'#dc2626';}
+function spStatusStyle(s){
+  return {complete:'background:#dcfce7;color:#166534',in_progress:'background:#fef9c3;color:#854d0e',not_started:'background:#fee2e2;color:#991b1b',na:'background:#f1f5f9;color:#64748b'}[s]||'background:#f1f5f9;color:#64748b';
+}
+function spField(label,val,extra){return`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(0,0,0,0.06);font-size:10px"><label style="color:#64748b;font-weight:500">${label}</label><value style="color:#1e293b;font-weight:600;text-align:right${extra?';'+extra:''}">${val}</value></div>`;}
+function spNoData(msg){return`<div style="background:#f8fafc;border:1.5px dashed #cbd5e1;border-radius:8px;padding:12px;text-align:center;font-size:10px;color:#94a3b8">${msg}</div>`;}
+
+function spBuild(){
+  const sel=document.getElementById('sp-sel');
+  if(!sel)return;
+  sel.innerHTML='<option value="">— Select school —</option>';
+  SP_DB.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s.code;
+    o.textContent=s.name+' · '+s.code+' · '+s.prov;
+    sel.appendChild(o);
+  });
+}
+
+function spFilter(q){
+  const sel=document.getElementById('sp-sel');
+  if(!sel)return;
+  const lq=q.toLowerCase().trim();
+  const matches=lq?SP_DB.filter(s=>s.name.toLowerCase().includes(lq)||s.code.toLowerCase().includes(lq)||s.prov.toLowerCase().includes(lq)):SP_DB;
+  sel.innerHTML='<option value="">— Select school —</option>';
+  matches.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s.code;
+    o.textContent=s.name+' · '+s.code+' · '+s.prov;
+    sel.appendChild(o);
+  });
+  if(matches.length===1){sel.value=matches[0].code;spLoad(matches[0].code);}
+}
+
+function spLoad(code){
+  if(!code){
+    document.getElementById('sp-none').style.display='block';
+    document.getElementById('sp-profile').style.display='none';
+    return;
+  }
+  const sc=SP_DB.find(s=>s.code===code);
+  if(!sc)return;
+  document.getElementById('sp-none').style.display='none';
+  document.getElementById('sp-profile').style.display='block';
+
+  document.getElementById('sp-name').textContent=sc.name;
+  document.getElementById('sp-code').textContent='School code: '+sc.code;
+  document.getElementById('sp-meta').textContent=sc.prov+' Province · '+sc.district+' District · '+sc.type+(sc.enrol?' · Enrolment: '+sc.enrol:'');
+
+  // Aggregate
+  const tlmOk=sc.tlm.confirmed;
+  const teachOk=sc.teacher.pct>=90;
+  const infraOk=sc.infra.status==='complete';
+  const eceOk=sc.ece.has_ece&&sc.ece.status==='complete';
+  const scoreColor=infraOk&&teachOk&&tlmOk?'#16a34a':infraOk||teachOk?'#d97706':'#dc2626';
+  document.getElementById('sp-agg').innerHTML=`
+    <div style="display:flex;flex-direction:column;align-items:center;min-width:60px">
+      <div style="font-size:28px;font-weight:700;color:${scoreColor}">${[tlmOk,teachOk,infraOk].filter(Boolean).length}/3</div>
+      <div style="font-size:9px;color:#90b8e0;text-align:center">core indicators<br>on track</div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <div style="text-align:center"><div style="font-size:14px">${tlmOk?'✅':'⚠️'}</div><div style="font-size:9px;color:#90b8e0">TLM</div></div>
+      <div style="text-align:center"><div style="font-size:14px">${teachOk?'✅':'⏳'}</div><div style="font-size:9px;color:#90b8e0">Training</div></div>
+      <div style="text-align:center"><div style="font-size:14px">${infraOk?'✅':'⏳'}</div><div style="font-size:9px;color:#90b8e0">Infra</div></div>
+      <div style="text-align:center"><div style="font-size:14px">${sc.ece.has_ece?(eceOk?'✅':'⏳'):'➖'}</div><div style="font-size:9px;color:#90b8e0">ECE</div></div>
+    </div>`;
+
+  // Freshness
+  const dates=[];
+  if(sc.tlm.date)dates.push('📦 TLM: <strong>'+sc.tlm.date+'</strong>');
+  if(sc.teacher.date)dates.push('👩‍🏫 Training: <strong>'+sc.teacher.date+'</strong>');
+  if(sc.infra.disbursed)dates.push('🏗️ Grant disbursed: <strong>'+sc.infra.disbursed+'</strong>');
+  if(sc.infra.complete_date)dates.push('✓ Infra complete: <strong>'+sc.infra.complete_date+'</strong>');
+  document.getElementById('sp-fresh').innerHTML='<span style="font-weight:600;color:#1F3864">Last submissions:</span>'+dates.map(d=>'<span>'+d+'</span>').join('');
+
+  // ── TLM ──
+  const t=sc.tlm;
+  const tlmSt=t.confirmed?'Delivery confirmed ✓':'Pending confirmation';
+  const tlmStyle=t.confirmed?'background:#dcfce7;color:#166534':'background:#fee2e2;color:#991b1b';
+  document.getElementById('sp-tlm-st').style.cssText=tlmStyle;
+  document.getElementById('sp-tlm-st').textContent=tlmSt;
+  document.getElementById('sp-tlm-body').innerHTML=
+    spField('Grade 3 readers',t.gr3?'✓ In scope':'➖ Not in scope',t.gr3?'color:#166534':'color:#64748b')+
+    spField('Grade 5 readers',t.gr5?'✓ In scope':'➖ Not in scope',t.gr5?'color:#166534':'color:#64748b')+
+    spField('Grade 7 readers',t.gr7?'✓ In scope':'➖ Not in scope',t.gr7?'color:#166534':'color:#64748b')+
+    (t.confirmed?spField('Receipt confirmed',t.date):spField('Receipt status','Awaiting confirmation','color:#991b1b'))+
+    spField('Field officer',t.officer||'—','')+
+    `<div style="font-size:9px;color:#64748b;margin-top:7px;line-height:1.4">${t.notes}</div>`;
+
+  // ── TEACHER ──
+  const te=sc.teacher;
+  const tePct=te.pct||0;
+  const teSt=tePct>=90?'On track ✓':tePct>=60?'In progress':'⚠ Behind target';
+  const teStyle=tePct>=90?'background:#dcfce7;color:#166534':tePct>=60?'background:#fef9c3;color:#854d0e':'background:#fee2e2;color:#991b1b';
+  document.getElementById('sp-teacher-st').style.cssText=teStyle;
+  document.getElementById('sp-teacher-st').textContent=teSt;
+  document.getElementById('sp-teacher-body').innerHTML=
+    spField('Teachers trained',te.trained+' / '+te.total,'')+
+    `<div style="height:5px;background:#dcfce7;border-radius:3px;margin-bottom:8px"><div style="height:5px;width:${tePct}%;background:${spPctColor(tePct)};border-radius:3px"></div></div>`+
+    spField('% trained','<span style="color:'+spPctColor(tePct)+';font-weight:700">'+tePct+'%</span>','')+
+    (te.cohort?spField('Training cohort',te.cohort,''):'')+
+    (te.date?spField('Last submission',te.date,''):'')+
+    `<div style="font-size:9px;color:#64748b;margin-top:7px;line-height:1.4">${te.notes}</div>`;
+
+  // ── INFRA ──
+  const inf=sc.infra;
+  const infSt={complete:'Complete ✓',in_progress:'In progress',not_started:'Not started ⚠'}[inf.status]||'—';
+  const infStyle=spStatusStyle(inf.status);
+  document.getElementById('sp-infra-st').style.cssText=infStyle;
+  document.getElementById('sp-infra-st').textContent=infSt;
+  let infraHTML=(inf.grant?spField('Grant amount',inf.grant,''):'')
+    +(inf.disbursed?spField('Disbursed',inf.disbursed,''):'')
+    +spField('Works progress',inf.pct+'%','')
+    +`<div style="height:5px;background:#dbeafe;border-radius:3px;margin-bottom:8px"><div style="height:5px;width:${inf.pct}%;background:${spPctColor(inf.pct)};border-radius:3px"></div></div>`;
+  if(inf.items&&inf.items.length>0){
+    infraHTML+=`<div style="font-size:10px;font-weight:600;color:#1e40af;margin-bottom:4px">Works scope:</div>`;
+    infraHTML+=inf.items.map(i=>`<div style="font-size:9px;color:#1e40af;padding:2px 0">• ${i}</div>`).join('');
+  }
+  infraHTML+=(inf.complete_date?spField('Completed',inf.complete_date,'color:#166534'):'')+spField('Field officer',inf.officer||'—','');
+  infraHTML+=`<div style="font-size:9px;color:#64748b;margin-top:7px;line-height:1.4">${inf.notes}</div>`;
+  document.getElementById('sp-infra-body').innerHTML=infraHTML;
+
+  // ── ECE ──
+  const ece=sc.ece;
+  if(!ece.has_ece){
+    document.getElementById('sp-ece-st').style.cssText=spStatusStyle('na');
+    document.getElementById('sp-ece-st').textContent='Not applicable';
+    document.getElementById('sp-ece-body').innerHTML=spNoData(ece.notes||'No ECE centre at this school.');
+  } else {
+    const eceSt={complete:'Complete ✓',in_progress:'In progress',not_started:'Not yet started'}[ece.status]||'—';
+    const eceStyle=spStatusStyle(ece.status);
+    document.getElementById('sp-ece-st').style.cssText=eceStyle;
+    document.getElementById('sp-ece-st').textContent=eceSt;
+    document.getElementById('sp-ece-body').innerHTML=
+      spField('Centre name',ece.centre_name||'—','')+
+      (ece.enrol?spField('Enrolment',ece.enrol+'',''): '')+
+      spField('MOS standards met',ece.mos!==null?ece.mos+' / 6':'—',ece.mos>=5?'color:#166534':ece.mos>=3?'color:#854d0e':'color:#991b1b')+
+      `<div style="height:5px;background:#ede9fe;border-radius:3px;margin-bottom:8px"><div style="height:5px;width:${ece.mos!==null?Math.round(ece.mos/6*100):0}%;background:${spPctColor(ece.mos!==null?Math.round(ece.mos/6*100):0)};border-radius:3px"></div></div>`+
+      (ece.sub_grant?spField('Sub-grant',ece.sub_grant,''):'')+
+      `<div style="font-size:9px;color:#64748b;margin-top:7px;line-height:1.4">${ece.notes}</div>`;
+  }
+
+  document.getElementById('sp-updated').textContent='Dashboard data as of Q1 2026 · Last ISR: Feb 2026 · Bluetree/KoboToolbox live sync';
+}
+
+spBuild();
 
 </script>
 </body>
