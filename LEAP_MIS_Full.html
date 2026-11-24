@@ -157,12 +157,12 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
   <div class="hdr-r"><span class="bdg bb">Phase 1 active</span><span class="bdg bg">Data live</span><span class="bdg ba">Q1 2026</span></div>
 </div>
 <div class="nav">
-  <div class="ntab on" data-tab="overview">Portfolio overview</div>
-  <div class="ntab" data-tab="ece">C1 — ECE</div>
-  <div class="ntab" data-tab="teacher">C2 — Teachers &amp; TLM</div>
-  <div class="ntab" data-tab="infra">C3 — Infrastructure &amp; ICT</div>
-  <div class="ntab" data-tab="me">C4 — M&amp;E</div>
-  <div class="ntab" data-tab="disb">Disbursements</div>
+  <div class="ntab on" data-tab="overview">📊 Portfolio overview</div>
+  <div class="ntab" data-tab="ece">🌱 C1: ECE</div>
+  <div class="ntab" data-tab="teacher">📚 C2: Teachers &amp; TLM</div>
+  <div class="ntab" data-tab="infra">🏗️ C3: Infrastructure &amp; ICT</div>
+  <div class="ntab" data-tab="me">📈 C4: M&amp;E</div>
+  <div class="ntab" data-tab="disb">💰 Disbursements</div>
   <div class="ntab" data-tab="school">🏫 School profile</div>
 </div>
 <div class="src-bar">
@@ -233,9 +233,9 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:#eef2f7;padding:14px;min
       <div class="ct">ECE centre locations — 8 target provinces</div>
       <div class="map-wrap" id="mw-ece"><div class="map-loading" id="ml-ece"><div class="spin"></div>Loading PNG map…</div><svg id="ms-ece" style="display:none;width:100%;height:280px"></svg></div>
       <div class="leg" style="margin-top:7px">
-        <div class="li"><div class="ld" style="background:#7c3aed"></div>Sub-grant + MOS met</div>
-        <div class="li"><div class="ld" style="background:#a78bfa"></div>Sub-grant, partial MOS</div>
-        <div class="li"><div class="ld" style="background:#dc2626"></div>No sub-grant yet</div>
+        <div class="li"><div class="ld" style="background:#7c3aed"></div>Sub-grant disbursed, centres confirmed</div>
+        <div class="li"><div class="ld" style="background:#a78bfa"></div>Sub-grant disbursed, works in progress</div>
+        <div class="li"><div class="ld" style="background:#dc2626"></div>Sub-grant not yet disbursed</div>
       </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:10px">
@@ -715,7 +715,8 @@ function miniTable(id,data,unit){
 let topo=null;
 const mapBuilt={};
 
-function buildMap(svgId,loadId,data){
+function buildMap(svgId,loadId,data,palette){
+  const cols=palette||{complete:'#16a34a',inprogress:'#d97706',notstarted:'#dc2626'};
   const svgEl=document.getElementById(svgId);
   const loadEl=document.getElementById(loadId);
   if(!svgEl||!loadEl)return;
@@ -734,7 +735,7 @@ function buildMap(svgId,loadId,data){
     const tip=svg.append('g').style('pointer-events','none');
     data.forEach((p,i)=>{
       const [px,py]=proj([p.lon,p.lat]);
-      const col=stColor(p);
+      const col=cols[provSt(p)]||'#94a3b8';
       const r=8+Math.round(p.complete/p.target*9);
       const g=svg.append('g').style('cursor','pointer');
       g.append('circle').attr('cx',px).attr('cy',py).attr('r',r+3).attr('fill',col).attr('opacity',0.2);
@@ -851,7 +852,7 @@ function buildHtOverview(){
 }
 
 const tabMaps={
-  ece:()=>{if(!mapBuilt.ece){buildMap('ms-ece','ml-ece',DATA.ece);mapBuilt.ece=true;}},
+  ece:()=>{if(!mapBuilt.ece){buildMap('ms-ece','ml-ece',DATA.ece,{complete:'#7c3aed',inprogress:'#a78bfa',notstarted:'#dc2626'});mapBuilt.ece=true;}},
   teacher:()=>{if(!mapBuilt.tlm){buildMap('ms-tlm','ml-tlm',DATA.tlm);mapBuilt.tlm=true;}miniTable('tbl-tlm-mini',DATA.tlm,'schools');},
   infra:()=>{if(!mapBuilt.infra){buildMap('ms-infra','ml-infra',DATA.infra);buildMap('ms-ict','ml-ict',DATA.ict);mapBuilt.infra=true;}const _icv=document.getElementById('ict-chart-view'),_icc=document.getElementById('ict-contractor-view');if(_icv)_icv.style.display='block';if(_icc)_icc.style.display='none';document.querySelectorAll('#pg-infra .mtog').forEach((b,i)=>b.classList.toggle('on',i===0));miniTable('tbl-infra-mini',DATA.infra,'schools');miniTable('tbl-ict-mini',DATA.ict,'hubs');},
 };
